@@ -1,7 +1,9 @@
 import csv
 
 
-def drop_check(case_name, item):
+def drop_check(case_name: str, item: str) -> bool:
+    """Checks if item exists. Because not every item has all wears."""
+    # removes wear from item name
     item_without_wear = ""
     if "Factory New" in item:
         item_without_wear = item[:-13]
@@ -16,14 +18,14 @@ def drop_check(case_name, item):
     else:
         print("Error in item name")
 
-    item_quality = ""
+    item_wear = ""
     with open(case_name, 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            if row['case'] == item_without_wear.strip():
-                item_quality = row["wear"]
+            if row['skin_name'] == item_without_wear.strip():
+                item_wear = row["wear"]
 
-    wear_list = item_quality.split(",")
+    wear_list = item_wear.split(",")
 
     full_item_names = []
     for wear in wear_list:
