@@ -41,4 +41,3 @@ def getInventoryPrices(steamid, filter):
 
 
 getInventoryPrices(steamid, filter)
-
