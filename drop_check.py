@@ -33,5 +33,3 @@ def drop_check(file_name, item):
     if item in full_item_names:
         return True
     return False
-
-print(drop_check("cs20_case.csv", "Dual Berettas | Elite 1.6 (Minimal Wear)"))
