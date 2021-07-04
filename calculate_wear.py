@@ -22,7 +22,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
 
     # picks random skin names for total amount of drops of quality x
     skin_names_by_quality = []
-    for i in range(amount):
+    for i in range(int(amount)):
         random_skin_name = random.choice(all_skin_names_by_quality)
         skin_names_by_quality.append(random_skin_name)
 
@@ -69,7 +69,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
 
     # writes result into cache.csv 
     with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['skin_name', 'amount_of_skin_names_by_quality']
+        fieldnames = ['skin_name', 'amount_of_drops']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         for skin_name, amount in skin_name_with_wear.items():
-            writer.writerow({'skin_name': skin_name, 'amount_of_skin_names_by_quality': amount})
+            writer.writerow({'skin_name': skin_name, 'amount_of_drops': amount})
