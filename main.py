@@ -159,4 +159,6 @@ print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
 
-# work in progress: maybe delete cache.csv after program is executed.
+# deletes cache files with resuslts, no longer needed.
+if os.path.exists('cache.csv'):
+    os.remove('cache.csv')
