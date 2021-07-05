@@ -22,12 +22,11 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
 
     # picks random skin names for total amount of drops of quality x
     skin_names_by_quality = []
-    for x in range(int(amount)):
+    for i in range(int(amount)):
         random_skin_name = random.choice(all_skin_names_by_quality)
         skin_names_by_quality.append(random_skin_name)
 
     # initializes dictionary with skin name and wear as key and drop count as value
-    global skin_name_with_wear
     skin_name_with_wear = {}
     for skin_name in skin_names_by_quality:
         skin_name_with_wear[skin_name + " (Battle-Scarred)"] = 0

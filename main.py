@@ -1,13 +1,32 @@
+# CSGO Case Simulator
+
 import csv
 import os
 import random
 import math
 import requests
 import time
+import locale
 from calculate_wear import calculate_wear
 from functions import market_case_name
-from functions import 
-# CSGO Case Simulator
+from functions import vanilla_check
+
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+def is_stattrack() -> bool:
+    """Returns True if random number <= 0.1, else False"""
+    stattrack_chance = random.uniform(0, 1)
+    if stattrack_chance <= 0.1:
+        return True
+    return False
+
+
+def add_drop_for_quality(color):
+    """Adds drops into drop_amount_by_quality"""
+    if is_stattrack():
+        drop_amount_by_quality["stat_" + color] += 1
+    else:
+        drop_amount_by_quality[color] += 1
 
 
 # stores the amount of drops for each item quality
@@ -43,19 +62,22 @@ while True:
     else:
         print(f"File: {case_name} does not exist.")
 
-# get current case price
-
+# get case price
 formatted_case_name = market_case_name[case_name]
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                            "appid=730&currency=1&market_hash_name=" + formatted_case_name)
+                              "appid=730&currency=1&market_hash_name="
+                              + formatted_case_name)
 
 if get_case_price.status_code == 200: # 200 = successful request
     steam_response = get_case_price.json()
     case_price = float(steam_response["lowest_price"][1:]) # removes $
 else:
-    print(f"Failed to get price for {formatted_case_name}")
-    print("Program can't be executed.")
+    # case_price needs a value, program can't be executed.
+    print(f"Failed to get price for {formatted_case_name}! \n"
+          "Please wait 1-2 minutes or choose a different case.\n"
+          "Quitting...")
     quit()
+
 
 # asks for amount of cases or money amount to spend
 while True:
@@ -101,52 +123,68 @@ while opened < to_open:
 
 # loops through the dictionary with drop amount for qualities and calculates the wear.
 for quality, amount in drop_amount_by_quality.items():
-    if amount > 0:
+    if amount != 0:
         calculate_wear(case_name, quality, amount)
 
 # add items into new list, for multiple drops
-complete_item_drop_list = []
+# if skins is a vanilla skin, the wear is removed in vanilla_check()
+complete_item_drop_dict = {}
 with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         if int(row["amount_of_drops"]) >= 1:
-            for x in range(int(row["amount_of_drops"])):
-                complete_item_drop_list.append(row["skin_name"])
-                # work in progress: Anfragen für doppelte items werden mehrfach gestellt. evtl. nach Preis nach anfrage multiplizieren.
+            check = vanilla_check(row["skin_name"])
+            if check != False:
+                try:
+                    complete_item_drop_dict[check] += int(row["amount_of_drops"])
+                except:
+                    complete_item_drop_dict[check] = int(row["amount_of_drops"])
+            else:
+                complete_item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
-"""
+# remove later
+fail_list = []
 item_price_list = []
 count = 0
-for item in complete_item_drop_list:
+for item_name, amount in complete_item_drop_dict.items():
     count += 1
     if count == 20:
         # steam will block you after too many requests
-        print("TIMEOUT!")
-        time.sleep(60)
+        for i in range(60):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"{i - 60} seconds left until next request.")
+            time.sleep(1)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("New requests are being sent...")
         count = 0
 
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                            "appid=730&currency=1&market_hash_name=" + item)
+                            "appid=730&currency=1&market_hash_name=" + item_name)
     if response.status_code == 200: # 200 == successful request
         steam_response = response.json()
-        item_price_list.append(steam_response["lowest_price"])
+        try: # ", " needs to be in lowest price
+            if "," in steam_response:
+                formatted_price = steam_response["lowest_price"][1:]
+                item_price_list.append(locale.atof(formatted_price))
+            else:
+                formatted_price = steam_response["lowest_price"][1:] # removes $
+                steam_price = float(formatted_price) * float(amount)
+                item_price_list.append(steam_price)
+        except:
+            print(f"Failed to get price for {item_name}")
+            fail_list.append(item_name)
     else:
-        print(f"Failed to get price for {item}")
-
-# strips currency sign from steam response
-item_prices = []
-for price in item_price_list:
-   price_without_currency = price[1:]
-   item_prices.append(float(price_without_currency))
+        print(f"Failed to get price for {item_name}")
+        fail_list.append(item_name)
 
 rounded_cash = round(cash, 2)
-rounded_sum = round(sum(item_prices), 2)
-rounded_result = round(sum(item_prices) - rounded_cash, 2)
-
+rounded_sum = round(sum(item_price_list), 2)
+rounded_result = round(sum(item_price_list) - rounded_cash, 2)
+print(fail_list)
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
-"""
+
 # deletes cache files with results, no longer needed.
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
