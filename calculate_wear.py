@@ -36,7 +36,8 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
         skin_name_with_wear[skin_name + " (Minimal Wear)"] = 0
         skin_name_with_wear[skin_name + " (Factory New)"] = 0
 
-    # loops through skin names, calculates wear and checks if skin name with wear exists in current csv file (case)
+    # loops through skin names, calculates wear
+    # and checks if skin name with wear exists in current case (csvfile),
     # if skin exists drop count is raised by 1
     for item in skin_names_by_quality:
         float = random.uniform(0, 1)
@@ -67,7 +68,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
                     break
                 continue
 
-    # writes/appends result into cache.csv
+    # writes/appends results into cache.csv
     with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['skin_name', 'amount_of_drops']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)

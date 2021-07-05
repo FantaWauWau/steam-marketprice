@@ -60,7 +60,7 @@ while True:
 # get case price
 formatted_case_name = market_case_name[case_name]
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                            "appid=730&currency=1&market_hash_name=" + formatted_case_name)
+                              "appid=730&currency=1&market_hash_name=" + formatted_case_name)
 
 if get_case_price.status_code == 200: # 200 = successful request
     steam_response = get_case_price.json()
