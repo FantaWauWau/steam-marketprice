@@ -129,7 +129,6 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             complete_item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
 
-
 item_price_list = []
 count = 0
 for item_name, amount in complete_item_drop_dict.items():
@@ -159,5 +158,5 @@ print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
 
 # deletes cache files with results, no longer needed.
-if os.path.exists('cache.csv'):
-    os.remove('cache.csv')
+#if os.path.exists('cache.csv'):
+    #os.remove('cache.csv')

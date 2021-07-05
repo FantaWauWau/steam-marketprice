@@ -4,6 +4,7 @@ import csv
 def drop_check(case_name: str, item: str) -> bool:
     """Checks if item exists. Because not every item has all wears."""
     # removes wear from item name
+    print(item)
     item_without_wear = ""
     if "Factory New" in item:
         item_without_wear = item[:-13]
@@ -19,7 +20,7 @@ def drop_check(case_name: str, item: str) -> bool:
         print(f"Failed to format {item}! \n"
               "Script can't be executed anymore...")
         quit()
-
+    print(item_without_wear)
     item_wear = ""
     try:
         with open(case_name, 'r', encoding='utf-8') as csvfile:
@@ -30,14 +31,14 @@ def drop_check(case_name: str, item: str) -> bool:
     except FileNotFoundError:
         print(FileNotFoundError)
         quit()
-
     wear_list = item_wear.split(",")
-
+    # builds item_name with all availables wears and adds them into a list
     full_item_names = []
     for wear in wear_list:
         full_item_name = item_without_wear + wear.lstrip()
         full_item_names.append(full_item_name)
-
+    
+    # function paramater (item) is checked if it exists in list with all available item + wears.
     if item in full_item_names:
         return True
     return False

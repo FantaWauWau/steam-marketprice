@@ -35,13 +35,12 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
         skin_name_with_wear[skin_name + " (Field-Tested)"] = 0
         skin_name_with_wear[skin_name + " (Minimal Wear)"] = 0
         skin_name_with_wear[skin_name + " (Factory New)"] = 0
-
     # loops through skin names, calculates wear
     # and checks if skin name with wear exists in current case (csvfile),
     # if skin exists drop count is raised by 1
     for item in skin_names_by_quality:
-        float = random.uniform(0, 1)
         while True:
+            float = random.uniform(0, 1)
             if 1 > float >= 0.45:
                 if drop_check(case_name, item + " (Battle-Scarred)"):
                     skin_name_with_wear[item + " (Battle-Scarred)"] += 1
