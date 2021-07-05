@@ -1,10 +1,13 @@
 import csv
 
+market_case_name = {
+    "cs20_case.csv": "CS20 Case",
+    "csgo_weapon_case.csv": "CS:GO Weapon Case"
+}
 
 def drop_check(case_name: str, item: str) -> bool:
     """Checks if item exists. Because not every item has all wears."""
     # removes wear from item name
-    print(item)
     item_without_wear = ""
     if "Factory New" in item:
         item_without_wear = item[:-13]
@@ -20,7 +23,7 @@ def drop_check(case_name: str, item: str) -> bool:
         print(f"Failed to format {item}! \n"
               "Script can't be executed anymore...")
         quit()
-    print(item_without_wear)
+
     item_wear = ""
     try:
         with open(case_name, 'r', encoding='utf-8') as csvfile:
@@ -37,8 +40,19 @@ def drop_check(case_name: str, item: str) -> bool:
     for wear in wear_list:
         full_item_name = item_without_wear + wear.lstrip()
         full_item_names.append(full_item_name)
-    
+
     # function paramater (item) is checked if it exists in list with all available item + wears.
     if item in full_item_names:
         return True
     return False
+
+
+def vanilla_check(skin_name: str):
+    """Checks if skins is vanilla and removes the wear"""
+    with open("vanilla_knife.csv", "r") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            if skin_name == row["skin_name"]:
+                vanilla_name = row["vanilla_name"]
+                return vanilla_name # wear is removed from string
+        return False

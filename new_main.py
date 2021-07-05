@@ -1,3 +1,5 @@
+# CSGO Case Simulator
+
 import csv
 import os
 import random
@@ -5,8 +7,9 @@ import math
 import requests
 import time
 from calculate_wear import calculate_wear
-from case_name import market_case_name
-# CSGO Case Simulator
+from functions import market_case_name
+from functions import vanilla_check
+
 
 def is_stattrack() -> bool:
     """Returns True if random number <= 0.1, else False"""
@@ -60,7 +63,8 @@ while True:
 # get case price
 formatted_case_name = market_case_name[case_name]
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                              "appid=730&currency=1&market_hash_name=" + formatted_case_name)
+                              "appid=730&currency=1&market_hash_name="
+                              + formatted_case_name)
 
 if get_case_price.status_code == 200: # 200 = successful request
     steam_response = get_case_price.json()
@@ -126,8 +130,14 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         if int(row["amount_of_drops"]) >= 1:
-            complete_item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
-
+            check = vanilla_check(row["skin_name"])
+            if check != False:
+                try:
+                    complete_item_drop_dict[check] += int(row["amount_of_drops"])
+                except:
+                    complete_item_drop_dict[check] = int(row["amount_of_drops"])
+            else:
+                complete_item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
 item_price_list = []
 count = 0
@@ -143,7 +153,7 @@ for item_name, amount in complete_item_drop_dict.items():
                             "appid=730&currency=1&market_hash_name=" + item_name)
     if response.status_code == 200: # 200 == successful request
         steam_response = response.json()
-        formatted_price = steam_response["lowest_price"][1:]
+        formatted_price = steam_response["lowest_price"][1:] # removes $
         steam_price = float(formatted_price) * float(amount)
         item_price_list.append(steam_price)
     else:

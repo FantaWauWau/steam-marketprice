@@ -1,6 +1,6 @@
 import random
 import csv
-from drop_check import drop_check
+from functions import drop_check
 
 def calculate_wear(case_name: str, quality: str, amount: int) -> None:
     """Takes skins quality (color) and drop amount as arguments and calculates/writes skin_names_by_quality in csv file"""
@@ -22,7 +22,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
 
     # picks random skin names for total amount of drops of quality x
     skin_names_by_quality = []
-    for i in range(int(amount)):
+    for x in range(int(amount)):
         random_skin_name = random.choice(all_skin_names_by_quality)
         skin_names_by_quality.append(random_skin_name)
 
