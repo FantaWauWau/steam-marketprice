@@ -67,7 +67,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
                     break
                 continue
 
-    # writes result into cache.csv 
+    # writes/appends result into cache.csv
     with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
         fieldnames = ['skin_name', 'amount_of_drops']
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)

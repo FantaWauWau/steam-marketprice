@@ -16,14 +16,20 @@ def drop_check(case_name: str, item: str) -> bool:
     elif "(Battle-Scarred)" in item:
         item_without_wear = item[:-16]
     else:
-        print("Error in item name")
+        print(f"Failed to format {item}! \n"
+              "Script can't be executed anymore...")
+        quit()
 
     item_wear = ""
-    with open(case_name, 'r', encoding='utf-8') as csvfile:
-        reader = csv.DictReader(csvfile)
-        for row in reader:
-            if row['skin_name'] == item_without_wear.strip():
-                item_wear = row["wear"]
+    try:
+        with open(case_name, 'r', encoding='utf-8') as csvfile:
+            reader = csv.DictReader(csvfile)
+            for row in reader:
+                if row['skin_name'] == item_without_wear.strip():
+                    item_wear = row["wear"]
+    except FileNotFoundError:
+        print(FileNotFoundError)
+        quit()
 
     wear_list = item_wear.split(",")
 
