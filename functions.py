@@ -7,9 +7,8 @@ market_case_name = {
     "csgo_weapon_case.csv": "CS:GO Weapon Case"
 }
 
-
 def is_stattrack() -> bool:
-    """Returns True if random number <= 0.1."""
+    """Returns True if random number <= 0.1 == stat strack skin."""
     stattrack_chance = 0.1
     random_num = random.uniform(0, 1)
     if random_num <= stattrack_chance:
@@ -22,7 +21,7 @@ def drop_check(case_name: str, item: str) -> bool:
 
     Args:
         case_name: name of case which is opened. This one will be checked.
-        item: item name with wear to be checked, wether it exists in current csv
+        item: item name with wear to be checked, whether it exists in csv.
 
     Returns:
         True, if skin + wear exists.
@@ -94,7 +93,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
     Args:
         case_name: name of case which is opened by user.
         quality: Quality of skin (e.g. "blue", "yellow").
-        amount: Amount of drops for the current quality (e.g. "blue" has 50 drops).
+        amount: Amount of drops for the current quality (e.g. "blue": 50).
 
     Returns:
         Dictionary with all skin names + wear with amount of drops for each.
@@ -106,7 +105,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
         for row in reader:
             item_list.append(row)
 
-    # removes every dictionary from item_list which doesn't match the passed quality
+    # removes every dict from item_list which doesn't match the passed quality
     items_by_quality = [item for item in item_list if item['quality'] == quality]
 
     # creates a list with all skin names of quality x (e.g. "blue")
@@ -121,7 +120,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
         random_skin_name = random.choice(all_skin_names_by_quality)
         skin_names_by_quality.append(random_skin_name)
 
-    # initializes dictionary with skin name + wear as key and drop count as value
+    # initializes dict with skin name + wear as key and drop count as value
     skin_name_with_wear = {}
     for skin_name in skin_names_by_quality:
         skin_name_with_wear[skin_name + " (Battle-Scarred)"] = 0
