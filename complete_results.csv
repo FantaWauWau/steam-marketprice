@@ -1,2 +1,7 @@
-case_name,total_opened,total_spent,return
-bravo_case,40,2000,3000
+case_name,total_opened,total_spent,return_on_invest
+
+cs20_case,0,0,0
+
+csgo_weapon_case,0,0,0
+
+bravo_case,0,0,0

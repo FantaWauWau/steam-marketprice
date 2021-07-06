@@ -191,6 +191,29 @@ print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
 
+
+current_results = []
+results = []
+
+with open('complete_results.csv', 'r') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        if row["case_name"] != case_name:
+            current_results.append(row)
+        else:
+            results.append(row)
+current_results.append({'case_name': case_name,
+            'total_opened': int(results[0]["total_opened"]) + to_open,
+            'total_spent': float(results[0]["total_spent"]) + rounded_cash,
+            'return_on_invest': float(results[0]["return_on_invest"]) + rounded_result})
+
+with open('complete_results.csv', 'w') as csvfile:
+    fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in current_results:
+        writer.writerow(row)
+
 # deletes cache files
 # useful for debugging
 #if os.path.exists('cache.csv'):
