@@ -54,14 +54,14 @@ while True:
         print(f"File: {case_name} does not exist.")
 
 # get current case price
-formatted_case_name = market_case_name[case_name] # formatted case name in functions.py
+formatted_case_name = market_case_name[case_name]  # formatted case name
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
 
-if get_case_price.status_code == 200: # 200 = successful request
+if get_case_price.status_code == 200:  # 200 = successful request
     steam_response = get_case_price.json()
-    case_price = float(steam_response["lowest_price"][1:]) # removes $
+    case_price = float(steam_response["lowest_price"][1:])  # removes $
 else:
     # case_price needs a value, program can't be executed.
     print(f"Failed to get price for {formatted_case_name}! \n"
@@ -112,7 +112,7 @@ while opened < to_open:
     opened += 1
 
 
-# loops through the dictionary with drop amount for qualities and calculates the wear.
+# loops through the dict with drop amount for qualities and calculates wear.
 for quality, amount in drop_amount_by_quality.items():
     if amount != 0:
         skin_name_with_wear_dict = calculate_wear(case_name, quality, amount)
@@ -124,7 +124,7 @@ for quality, amount in drop_amount_by_quality.items():
 
 # add items into new list, for multiple drops
 # if skins is a vanilla skin, the wear is removed in vanilla_check()
-complete_item_drop_dict = {}
+item_drop_dict = {}
 with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -132,17 +132,17 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             is_vanilla, vanilla_name = vanilla_check(row["skin_name"])
             if is_vanilla:
                 try:
-                    complete_item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
+                    item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
                 except:
-                    complete_item_drop_dict[vanilla_name] = int(row["amount_of_drops"])
+                    item_drop_dict[vanilla_name] = int(row["amount_of_drops"])
             else:
-                complete_item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
+                item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
 # remove fail list later, only for testing
 fail_list = []
 item_price_list = []
 count = 0
-for item_name, amount in complete_item_drop_dict.items():
+for item_name, amount in item_drop_dict.items():
     count += 1
     if count == 20:
         # steam will block you after too many requests
@@ -156,9 +156,9 @@ for item_name, amount in complete_item_drop_dict.items():
 
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
                             "appid=730&currency=1&market_hash_name=" + item_name)
-    if response.status_code == 200: # 200 == successful request
+    if response.status_code == 200:  # 200 == successful request
         steam_response = response.json()
-        formatted_price = steam_response["lowest_price"][1:] # removes $
+        formatted_price = steam_response["lowest_price"][1:]  # removes $
         if "," in formatted_price:
             item_price_list.append(locale.atof(formatted_price))
         else:
@@ -166,7 +166,7 @@ for item_name, amount in complete_item_drop_dict.items():
             item_price_list.append(steam_price)
     else:
         print(f"Failed to get price for {item_name}")
-        fail_list.append(item_name) # remove later, only for testing
+        fail_list.append(item_name)  # remove later, only for testing
 
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
