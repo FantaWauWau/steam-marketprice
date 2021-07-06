@@ -125,10 +125,12 @@ for quality, amount in drop_amount_by_quality.items():
 # add items into new list, for multiple drops
 # if skins is a vanilla skin, the wear is removed in vanilla_check()
 item_drop_dict = {}
+request_count = 0
 with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         if int(row["amount_of_drops"]) >= 1:
+            request_count += 1
             is_vanilla, vanilla_name = vanilla_check(row["skin_name"])
             if is_vanilla:
                 try:
@@ -138,6 +140,8 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
+print(f"Requesting prices for {request_count} unique skins.")
+end_request_count = request_count
 # remove fail list later, only for testing
 fail_list = []
 item_price_list = []
@@ -158,25 +162,32 @@ for item_name, amount in item_drop_dict.items():
                             "appid=730&currency=1&market_hash_name=" + item_name)
     if response.status_code == 200:  # 200 == successful request
         steam_response = response.json()
-        formatted_price = steam_response["lowest_price"][1:]  # removes $
-        if "," in formatted_price:
-            item_price_list.append(locale.atof(formatted_price))
-        else:
-            steam_price = float(formatted_price) * float(amount)
-            item_price_list.append(steam_price)
+        try:
+            formatted_price = steam_response["lowest_price"][1:]  # removes $
+            if "," in formatted_price:
+                item_price_list.append(locale.atof(formatted_price))
+            else:
+                steam_price = float(formatted_price) * float(amount)
+                item_price_list.append(steam_price)
+        except:
+            fail_list.append(item_name)
     else:
-        print(f"Failed to get price for {item_name}")
         fail_list.append(item_name)  # remove later, only for testing
+    request_count -= 1
+    print(f"{request_count} requests left.")
+    time.sleep(0.3)
+
 
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
-
+os.system('cls' if os.name == 'nt' else 'clear')
 # only for testing/debugging, remove later
 if len(fail_list) > 0:
     for item in fail_list:
         print(f"Failed to get price for {item}")
 
+print(f"You opened {to_open} cases for a total of {end_request_count} unique skins.")
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
