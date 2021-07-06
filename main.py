@@ -14,9 +14,10 @@ from functions import vanilla_check
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def is_stattrack() -> bool:
-    """Returns True if random number <= 0.1, else False"""
-    stattrack_chance = random.uniform(0, 1)
-    if stattrack_chance <= 0.1:
+    """Returns True if random number <= 0.1."""
+    stattrack_chance = 0.1
+    random_num = random.uniform(0, 1)
+    if random_num <= stattrack_chance:
         return True
     return False
 
@@ -44,14 +45,14 @@ drop_amount_by_quality = {
     "stat_yellow": 0
     }
 
-# create csv file to store items names and drop amount later
+# creates csv file to store items names + drop amount
 with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
     fieldnames = ["skin_name", "amount_of_drops"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
 
 
-# asks user for file name and checks if it exists.
+# case to open
 while True:
     case_name = input("Enter Case name to open: ")
     if case_name[-4:] != ".csv":
@@ -62,8 +63,8 @@ while True:
     else:
         print(f"File: {case_name} does not exist.")
 
-# get case price
-formatted_case_name = market_case_name[case_name]
+# get current case price
+formatted_case_name = market_case_name[case_name] # formatted case name in functions.py
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
@@ -162,17 +163,12 @@ for item_name, amount in complete_item_drop_dict.items():
                             "appid=730&currency=1&market_hash_name=" + item_name)
     if response.status_code == 200: # 200 == successful request
         steam_response = response.json()
-        try: # ", " needs to be in lowest price
-            if "," in steam_response:
-                formatted_price = steam_response["lowest_price"][1:]
-                item_price_list.append(locale.atof(formatted_price))
-            else:
-                formatted_price = steam_response["lowest_price"][1:] # removes $
-                steam_price = float(formatted_price) * float(amount)
-                item_price_list.append(steam_price)
-        except:
-            print(f"Failed to get price for {item_name}")
-            fail_list.append(item_name) # remove later, only for testing
+        formatted_price = steam_response["lowest_price"][1:] # removes $
+        if "," in formatted_price:
+            item_price_list.append(locale.atof(formatted_price))
+        else:
+            steam_price = float(formatted_price) * float(amount)
+            item_price_list.append(steam_price)
     else:
         print(f"Failed to get price for {item_name}")
         fail_list.append(item_name) # remove later, only for testing
@@ -180,11 +176,17 @@ for item_name, amount in complete_item_drop_dict.items():
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
-print(fail_list) # remove later, only for testing
+
+# only for testing/debugging, remove later
+if len(fail_list) > 0:
+    for item in fail_list:
+        print(f"Failed to get price for {item}")
+
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
 
-# deletes cache files with results, no longer needed.
+# deletes cache files
+# useful for debugging
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
