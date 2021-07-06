@@ -7,7 +7,16 @@ market_case_name = {
 }
 
 def drop_check(case_name: str, item: str) -> bool:
-    """Checks if item exists. Because not every item has all wears."""
+    """Checks if item exists. Because not every item has all wears.
+
+    Args:
+        case_name: name of case which is opened. This one will be checked.
+        item: name of item with wear to be checked, wether it exists in current csv (case_name)
+
+    Returns:
+        True, if skin + wear exists.
+        False, if skin + wear doesn't exist.
+    """
     # removes wear from item name
     item_without_wear = ""
     if "Factory New" in item:
@@ -35,6 +44,7 @@ def drop_check(case_name: str, item: str) -> bool:
     except FileNotFoundError:
         print(FileNotFoundError)
         quit()
+
     wear_list = item_wear.split(",")
     # builds item_name with all availables wears and adds them into a list
     full_item_names = []
