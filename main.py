@@ -1,5 +1,3 @@
-# CSGO Case Simulator
-
 import csv
 import os
 import random
@@ -7,19 +5,11 @@ import math
 import requests
 import time
 import locale
-from calculate_wear import calculate_wear
-from functions import market_case_name
-from functions import vanilla_check
+from functions import market_case_name, vanilla_check, is_stattrack, calculate_wear
+
+# CSGO Case Simulator
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-
-def is_stattrack() -> bool:
-    """Returns True if random number <= 0.1."""
-    stattrack_chance = 0.1
-    random_num = random.uniform(0, 1)
-    if random_num <= stattrack_chance:
-        return True
-    return False
 
 
 def add_drop_for_quality(color):
