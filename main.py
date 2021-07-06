@@ -140,6 +140,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
 print(f"Requesting prices for {request_count} unique skins.")
+
 end_request_count = request_count
 # remove fail list later, only for testing
 fail_list = []
@@ -176,7 +177,6 @@ for item_name, amount in item_drop_dict.items():
     print(f"{request_count} requests left.")
     time.sleep(0.3)
 
-
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
@@ -202,11 +202,13 @@ with open('complete_results.csv', 'r') as csvfile:
             current_results.append(row)
         else:
             results.append(row)
+
 current_results.append({'case_name': case_name,
             'total_opened': int(results[0]["total_opened"]) + to_open,
-            'total_spent': float(results[0]["total_spent"]) + rounded_cash,
-            'return_on_invest': float(results[0]["return_on_invest"]) + rounded_result})
+            'total_spent': round(float(results[0]["total_spent"]) + rounded_cash, 2),
+            'return_on_invest': round(float(results[0]["return_on_invest"]) + rounded_result, 2)})
 
+current_results.reverse()
 with open('complete_results.csv', 'w') as csvfile:
     fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
