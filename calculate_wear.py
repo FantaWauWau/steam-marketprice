@@ -2,7 +2,7 @@ import random
 import csv
 from functions import drop_check
 
-def calculate_wear(case_name: str, quality: str, amount: int) -> None:
+def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
     """Calculates a random wear for the dropped item qualities and writes results into cache.csv
 
     Args:
@@ -11,7 +11,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
         amount: Amount of drops for the current quality (e.g. "blue" has 50 drops).
 
     Returns:
-        None, the result of the calculation for quality is written into cache.csv.
+        Dictionary with all skin names + wear with amount of drops for each.
     """
     # creates a list of dictionaries with content of csv file (opened case name)
     item_list = []
@@ -75,9 +75,4 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> None:
                     break
                 continue
 
-    # writes/appends results into cache.csv
-    with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ['skin_name', 'amount_of_drops']
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        for skin_name, amount in skin_name_with_wear.items():
-            writer.writerow({'skin_name': skin_name, 'amount_of_drops': amount})
+    return skin_name_with_wear
