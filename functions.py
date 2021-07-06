@@ -4,7 +4,8 @@ import random
 # dictionary for formatting case name for price request to steam
 market_case_name = {
     "cs20_case.csv": "CS20 Case",
-    "csgo_weapon_case.csv": "CS:GO Weapon Case"
+    "csgo_weapon_case.csv": "CS:GO Weapon Case",
+    "bravo_case.csv": "Operation Bravo Case"
 }
 
 def is_stattrack() -> bool:
