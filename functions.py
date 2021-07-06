@@ -49,11 +49,18 @@ def drop_check(case_name: str, item: str) -> bool:
 
 
 def vanilla_check(skin_name: str):
-    """Checks if skins is vanilla and removes the wear"""
+    """Checks if skins is a vanilla knife.
+
+    Args:
+        skin_name: name of skin to check, with wear.
+    Returns:
+        Tuple of True and skin name without wear if skin is vanilla.
+        False if the skin is not a vanilla.
+    """
     with open("vanilla_knife.csv", "r") as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if skin_name == row["skin_name"]:
                 vanilla_name = row["vanilla_name"]
-                return vanilla_name # wear is removed from string
+                return True, vanilla_name # wear is removed from string
         return False
