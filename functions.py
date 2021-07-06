@@ -161,5 +161,5 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
                     skin_name_with_wear[item + " (Factory New)"] += 1
                     break
                 continue
-    # dictionary with skin_name: drop count is returned
+
     return skin_name_with_wear
