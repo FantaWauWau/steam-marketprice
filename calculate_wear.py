@@ -3,7 +3,16 @@ import csv
 from functions import drop_check
 
 def calculate_wear(case_name: str, quality: str, amount: int) -> None:
-    """Takes skins quality (color) and drop amount as arguments and calculates/writes skin_names_by_quality in csv file"""
+    """Calculates a random wear for the dropped item qualities and writes results into cache.csv
+
+    Args:
+        case_name: name of case which is opened by user.
+        quality: Quality of skin (e.g. "blue", "yellow").
+        amount: Amount of drops for the current quality (e.g. "blue" has 50 drops).
+
+    Returns:
+        None, the result of the calculation for quality is written into cache.csv.
+    """
     # creates a list of dictionaries with content of csv file (opened case name)
     item_list = []
     with open(case_name, 'r', encoding='utf-8') as csvfile:
