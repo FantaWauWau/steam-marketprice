@@ -6,7 +6,7 @@ import requests
 import time
 import locale
 from functions import market_case_name, vanilla_check, is_stattrack, calculate_wear
-
+print("TEST")
 # CSGO Case Simulator
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
