@@ -125,7 +125,12 @@ while opened < to_open:
 # loops through the dictionary with drop amount for qualities and calculates the wear.
 for quality, amount in drop_amount_by_quality.items():
     if amount != 0:
-        calculate_wear(case_name, quality, amount)
+        skin_name_with_wear_dict = calculate_wear(case_name, quality, amount)
+        with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = ['skin_name', 'amount_of_drops']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            for skin_name, amount in skin_name_with_wear_dict.items():
+                writer.writerow({'skin_name': skin_name, 'amount_of_drops': amount})
 
 # add items into new list, for multiple drops
 # if skins is a vanilla skin, the wear is removed in vanilla_check()
