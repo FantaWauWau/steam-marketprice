@@ -133,16 +133,16 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
         if int(row["amount_of_drops"]) >= 1:
-            check = vanilla_check(row["skin_name"])
-            if check != False:
+            is_vanilla, vanilla_name = vanilla_check(row["skin_name"])
+            if is_vanilla:
                 try:
-                    complete_item_drop_dict[check] += int(row["amount_of_drops"])
+                    complete_item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
                 except:
-                    complete_item_drop_dict[check] = int(row["amount_of_drops"])
+                    complete_item_drop_dict[vanilla_name] = int(row["amount_of_drops"])
             else:
                 complete_item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
-# remove later
+# remove fail list later, only for testing
 fail_list = []
 item_price_list = []
 count = 0
@@ -172,15 +172,15 @@ for item_name, amount in complete_item_drop_dict.items():
                 item_price_list.append(steam_price)
         except:
             print(f"Failed to get price for {item_name}")
-            fail_list.append(item_name)
+            fail_list.append(item_name) # remove later, only for testing
     else:
         print(f"Failed to get price for {item_name}")
-        fail_list.append(item_name)
+        fail_list.append(item_name) # remove later, only for testing
 
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
-print(fail_list)
+print(fail_list) # remove later, only for testing
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
