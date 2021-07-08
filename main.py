@@ -140,6 +140,8 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
 print(f"Requesting prices for {request_count} unique skins.")
+amount_of_timeouts = request_count / 20
+estimated_time = amount_of_timeouts * 60 + (request_count * 0.3)
 
 end_request_count = request_count
 # remove fail list later, only for testing
@@ -164,13 +166,15 @@ for item_name, amount in item_drop_dict.items():
         steam_response = response.json()
         try:
             formatted_price = steam_response["lowest_price"][1:]  # removes $
+        except:
+            formatted_price = steam_response["median_price"][1:]
+        else:
             if "," in formatted_price:
                 item_price_list.append(locale.atof(formatted_price))
             else:
                 steam_price = float(formatted_price) * float(amount)
                 item_price_list.append(steam_price)
-        except:
-            fail_list.append(item_name)
+
     else:
         fail_list.append(item_name)  # remove later, only for testing
     request_count -= 1
