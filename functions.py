@@ -53,7 +53,8 @@ def drop_check(case_name: str, item: str) -> bool:
                 if row['skin_name'] == item_without_wear.strip():
                     item_wear = row["wear"]
     except FileNotFoundError:
-        print(FileNotFoundError)
+        print(f"Couldn't find file: {case_name}!")
+        print("Quitting...")
         quit()
 
     wear_list = item_wear.split(",")
@@ -76,8 +77,8 @@ def vanilla_check(skin_name: str):
     Args:
         skin_name: name of skin to check, with wear.
     Returns:
-        Tuple of True and skin name without wear if skin is vanilla.
-        False if the skin is not a vanilla.
+        Tuple of True, skin name without wear if skin is vanilla.
+        False if the skin is not a vanilla, original skin name.
     """
     with open("vanilla_knife.csv", 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)

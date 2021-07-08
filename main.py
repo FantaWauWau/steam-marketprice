@@ -5,8 +5,9 @@ import math
 import requests
 import time
 import locale
+import time
 from functions import market_case_name, vanilla_check, is_stattrack, calculate_wear
-# CSGO Case Simulator
+
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -139,9 +140,11 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
+start_time = time.time()
 print(f"Requesting prices for {request_count} unique skins.")
 amount_of_timeouts = request_count / 20
-estimated_time = amount_of_timeouts * 60 + (request_count * 0.3)
+estimated_time = amount_of_timeouts * 60 + (request_count * 0.3 ) - 6  # -6 because time is always off +~6-8s
+print(f"Estimated time: {estimated_time}s")
 
 end_request_count = request_count
 # remove fail list later, only for testing
@@ -165,15 +168,18 @@ for item_name, amount in item_drop_dict.items():
     if response.status_code == 200:  # 200 == successful request
         steam_response = response.json()
         try:
-            formatted_price = steam_response["lowest_price"][1:]  # removes $
-        except:
-            formatted_price = steam_response["median_price"][1:]
-        else:
+            if "lowest_price" in steam_response:
+                formatted_price = steam_response["lowest_price"][1:]  # remove $
+            elif "median_price" in steam_response:
+                formatted_price = steam_response["median_price"][1:]
+                print(f"Got median price {formatted_price} for {item_name}.")  # delete later
             if "," in formatted_price:
                 item_price_list.append(locale.atof(formatted_price))
             else:
                 steam_price = float(formatted_price) * float(amount)
                 item_price_list.append(steam_price)
+        except:
+            fail_list.append(item_name)
 
     else:
         fail_list.append(item_name)  # remove later, only for testing
@@ -224,3 +230,6 @@ with open('complete_results.csv', 'w') as csvfile:
 # useful for debugging
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
+end_time = (time.time() - start_time)
+print(f"Estimated time: {estimated_time}")
+print(f"Actual time: {end_time}")
