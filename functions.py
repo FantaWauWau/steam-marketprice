@@ -79,7 +79,7 @@ def vanilla_check(skin_name: str):
         Tuple of True and skin name without wear if skin is vanilla.
         False if the skin is not a vanilla.
     """
-    with open("vanilla_knife.csv", "r") as csvfile:
+    with open("vanilla_knife.csv", 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if skin_name == row["skin_name"]:
