@@ -248,9 +248,6 @@ with open('est_time.csv', 'a', newline='') as file:
         writer.writerow({'act_request_time': time})
 
 
-# TESTING!
-# enable if est_time.csv has some data
-
 length_list = []
 total_act_time = 0
 with open('est_time.csv', 'r') as file:
