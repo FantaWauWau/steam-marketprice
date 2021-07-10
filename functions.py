@@ -4,11 +4,11 @@ import random
 # dictionary for formatting case name for price request to steam
 market_case_name = {
     "bravo_case.csv": "Operation Bravo Case",
-    "esports_2013_case": "eSports 2013 Case",
+    "esports_2013_case.csv": "eSports 2013 Case",
     "esports_2013_winter_case.csv": "eSports 2013 Winter Case",
     "esports_2014_summer_case.csv": "eSports 2014 Summer Case",
     "phoenix_case.csv": "Operation Phoenix Weapon Case",
-    "revolver_case": "Revolver Case",
+    "revolver_case.csv": "Revolver Case",
     "vanguard_case.csv": "Operation Vanguard Weapon Case",
     "weapon_case_2.csv": "CS:GO Weapon Case 2",
     "weapon_case_3.csv": "CS:GO Weapon Case 3",
@@ -56,7 +56,7 @@ def drop_check(case_name: str, item: str) -> bool:
 
     item_wear = ""
     try:
-        with open(case_name, 'r', encoding='utf-8') as csvfile:
+        with open(f"Cases/{case_name}", 'r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 if row['skin_name'] == item_without_wear.strip():
@@ -111,7 +111,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
     """
     # creates a list of dictionaries with content of csv file (opened case name)
     item_list = []
-    with open(case_name, 'r', encoding='utf-8') as csvfile:
+    with open(f"Cases/{case_name}", 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             item_list.append(row)

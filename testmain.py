@@ -69,6 +69,7 @@ else:
           "Quitting...")
     quit()
 
+case_price = 12.3
 
 # asks for amount of cases or money amount to spend
 while True:
@@ -239,3 +240,9 @@ with open('complete_results.csv', 'w') as csvfile:
 end_time = (time.time() - start_time)
 print(f"Estimated time: {round(estimated_time, 2)}")
 print(f"Actual time: {round(end_time, 2)}")
+
+with open('est_time.csv', 'a') as file:
+    fieldnames = ['count', 'total_act_time', 'total_est_time', 'act_time', 'est_time']
+    writer = csv.DictWriter(file, fieldnames=fieldnames)
+    writer.writerow({'count': request_count, 'total_act_time': round(end_time, 2), 'total_est_time': round(estimated_time, 2),
+                    'act_time': round(end_time, 2) / float(end_request_count), 'est_time': round(estimated_time, 2) / float(end_request_count)})

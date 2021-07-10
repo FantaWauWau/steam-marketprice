@@ -1,17 +1,3 @@
-from locale import setlocale
-import requests
-response = requests.get("https://steamcommunity.com/market/priceoverview/?appid=730"
-                        "&currency=1&market_hash_name=eSports 2013 Case")
-steam_response = response.json()
-print(steam_response)
+x = 12.3143131312313
 
-
-if 'lowest_price' in steam_response:
-    print("lowest")
-else:
-    print("Empty")
-
-if 'median_price' in steam_response:
-    print("median")
-else:
-    print("Empty")
+print(round(x, 2) / float(43))
