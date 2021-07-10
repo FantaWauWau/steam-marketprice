@@ -7,7 +7,7 @@ import time
 import locale
 import time
 from functions import market_case_name, vanilla_check, is_stattrack, calculate_wear
-UnboundLocalError
+
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
