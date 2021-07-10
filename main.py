@@ -140,10 +140,8 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
-start_time = time.time()
 
 amount_of_timeouts = math.floor(request_count / 20)
-
 if amount_of_timeouts < 1:
     estimated_time = (request_count * 0.6)
 else:
@@ -153,9 +151,11 @@ print(f"Requesting prices for {request_count} unique skins.")
 print(f"Estimated time: {round(estimated_time, 2)}s")
 
 end_request_count = request_count
+
 # remove fail list later, only for testing
 fail_list = []
 item_price_list = []
+act_request_time = []
 count = 0
 for item_name, amount in item_drop_dict.items():
     count += 1
@@ -168,7 +168,7 @@ for item_name, amount in item_drop_dict.items():
         os.system('cls' if os.name == 'nt' else 'clear')
         print("New requests are being sent...")
         count = 0
-
+    start_time = time.time()
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
                             "appid=730&currency=1&market_hash_name=" + item_name)
     if response.status_code == 200:  # 200 == successful request
@@ -178,7 +178,6 @@ for item_name, amount in item_drop_dict.items():
                 formatted_price = steam_response["lowest_price"][1:]  # remove $
             elif "median_price" in steam_response:
                 formatted_price = steam_response["median_price"][1:]
-                print(f"Got median price {formatted_price} for {item_name}.")  # delete later
             if "," in formatted_price:
                 item_price_list.append(locale.atof(formatted_price))
             else:
@@ -192,6 +191,7 @@ for item_name, amount in item_drop_dict.items():
     request_count -= 1
     print(f"{request_count} requests left.")
     time.sleep(0.3)
+    act_request_time.append((time.time() - start_time))
 
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
@@ -236,6 +236,30 @@ with open('complete_results.csv', 'w') as csvfile:
 # useful for debugging
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
-end_time = (time.time() - start_time)
+
+
 print(f"Estimated time: {round(estimated_time, 2)}")
-print(f"Actual time: {round(end_time, 2)}")
+
+
+with open('est_time.csv', 'a', newline='') as file:
+    fieldnames = ['act_request_time']
+    writer = csv.DictWriter(file, fieldnames=fieldnames)
+    for time in act_request_time:
+        writer.writerow({'act_request_time': time})
+
+
+# TESTING!
+# enable if est_time.csv has some data
+
+length_list = []
+total_act_time = 0
+with open('est_time.csv', 'r') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        length_list.append(row['act_request_time'])
+        total_act_time += float(row['act_request_time'])
+print(len(length_list))
+
+
+average_time_request = (total_act_time / len(length_list))
+print(f"Average time for a request is: {average_time_request}")
