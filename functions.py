@@ -3,10 +3,19 @@ import random
 
 # dictionary for formatting case name for price request to steam
 market_case_name = {
-    "cs20_case.csv": "CS20 Case",
-    "csgo_weapon_case.csv": "CS:GO Weapon Case",
-    "bravo_case.csv": "Operation Bravo Case"
+    "bravo_case.csv": "Operation Bravo Case",
+    "esports_2013_case": "eSports 2013 Case",
+    "esports_2013_winter_case.csv": "eSports 2013 Winter Case",
+    "esports_2014_summer_case.csv": "eSports 2014 Summer Case",
+    "phoenix_case.csv": "Operation Phoenix Weapon Case",
+    "revolver_case": "Revolver Case",
+    "vanguard_case.csv": "Operation Vanguard Weapon Case",
+    "weapon_case_2.csv": "CS:GO Weapon Case 2",
+    "weapon_case_3.csv": "CS:GO Weapon Case 3",
+    "weapon_case.csv": "CS:GO Weapon Case",
+    "winter_offensive_case.csv": "Winter Offensive Weapon Case"
 }
+
 
 def is_stattrack() -> bool:
     """Returns True if random number <= 0.1 == stat strack skin."""

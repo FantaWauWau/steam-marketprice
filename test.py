@@ -1,7 +1,7 @@
 from locale import setlocale
 import requests
 response = requests.get("https://steamcommunity.com/market/priceoverview/?appid=730"
-                        "&currency=1&market_hash_name=StatTrak™ M4A1-S | Dark Water (Minimal Wear)")
+                        "&currency=1&market_hash_name=eSports 2013 Case")
 steam_response = response.json()
 print(steam_response)
 
