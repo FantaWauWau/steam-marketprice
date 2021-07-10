@@ -246,3 +246,19 @@ with open('est_time.csv', 'a') as file:
     writer = csv.DictWriter(file, fieldnames=fieldnames)
     writer.writerow({'count': request_count, 'total_act_time': round(end_time, 2), 'total_est_time': round(estimated_time, 2),
                     'act_time': round(end_time, 2) / float(end_request_count), 'est_time': round(estimated_time, 2) / float(end_request_count)})
+
+
+# enable if est_time.csv has some data
+"""
+length_list = []
+total_act_time = 0
+with open('est_time.csv', 'r') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        length_list.append(row['count'])
+        total_act_time += row['act_time']
+
+
+average_time_request = total_act_time / len(length_list)
+print(f"Average time for a request is: {average_time_request}")
+"""

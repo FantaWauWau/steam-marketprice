@@ -1,3 +1,8 @@
-x = 12.3143131312313
+import csv
+length_list = []
+with open('cs20_case.csv', 'r', encoding='utf-8') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        length_list.append(row['skin_name'])
 
-print(round(x, 2) / float(43))
+print(len(length_list))
