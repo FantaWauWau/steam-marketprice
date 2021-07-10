@@ -6,7 +6,7 @@ import requests
 import time
 import locale
 import time
-from functions import market_case_name, vanilla_check, is_stattrack, calculate_wear
+import functions
 
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -14,7 +14,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 def add_drop_for_quality(color):
     """Adds drops into drop_amount_by_quality"""
-    if is_stattrack():
+    if functions.is_stattrack():
         drop_amount_by_quality["stat_" + color] += 1
     else:
         drop_amount_by_quality[color] += 1
@@ -54,7 +54,7 @@ while True:
         print(f"File: {case_name} does not exist.")
 
 # get current case price
-formatted_case_name = market_case_name[case_name]  # formatted case name
+formatted_case_name = functions.market_case_name[case_name]  # formatted case name
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
@@ -115,7 +115,7 @@ while opened < to_open:
 # loops through the dict with drop amount for qualities and calculates wear.
 for quality, amount in drop_amount_by_quality.items():
     if amount != 0:
-        skin_name_with_wear_dict = calculate_wear(case_name, quality, amount)
+        skin_name_with_wear_dict = functions.calculate_wear(case_name, quality, amount)
         with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['skin_name', 'amount_of_drops']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -131,7 +131,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     for row in reader:
         if int(row["amount_of_drops"]) >= 1:
             request_count += 1
-            is_vanilla, vanilla_name = vanilla_check(row["skin_name"])
+            is_vanilla, vanilla_name = functions.vanilla_check(row["skin_name"])
             if is_vanilla:
                 try:
                     item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
