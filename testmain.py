@@ -69,7 +69,6 @@ else:
           "Quitting...")
     quit()
 
-case_price = 12.3
 
 # asks for amount of cases or money amount to spend
 while True:
@@ -144,7 +143,6 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
 start_time = time.time()
 
 amount_of_timeouts = math.floor(request_count / 20)
-
 if amount_of_timeouts < 1:
     estimated_time = (request_count * 0.6)
 else:
@@ -154,6 +152,7 @@ print(f"Requesting prices for {request_count} unique skins.")
 print(f"Estimated time: {round(estimated_time, 2)}s")
 
 end_request_count = request_count
+
 # remove fail list later, only for testing
 fail_list = []
 item_price_list = []
@@ -237,6 +236,7 @@ with open('complete_results.csv', 'w') as csvfile:
 # useful for debugging
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
+
 end_time = (time.time() - start_time)
 print(f"Estimated time: {round(estimated_time, 2)}")
 print(f"Actual time: {round(end_time, 2)}")
@@ -247,9 +247,9 @@ with open('est_time.csv', 'a') as file:
     writer.writerow({'count': request_count, 'total_act_time': round(end_time, 2), 'total_est_time': round(estimated_time, 2),
                     'act_time': round(end_time, 2) / float(end_request_count), 'est_time': round(estimated_time, 2) / float(end_request_count)})
 
-
-# enable if est_time.csv has some data
 """
+# enable if est_time.csv has some data
+
 length_list = []
 total_act_time = 0
 with open('est_time.csv', 'r') as file:
