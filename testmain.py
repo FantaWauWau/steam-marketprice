@@ -248,6 +248,7 @@ with open('est_time.csv', 'a') as file:
                     'act_time': round(end_time, 2) / float(end_request_count), 'est_time': round(estimated_time, 2) / float(end_request_count)})
 
 """
+# TESTING!
 # enable if est_time.csv has some data
 
 length_list = []
