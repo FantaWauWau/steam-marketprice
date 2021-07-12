@@ -159,8 +159,7 @@ act_request_time = []
 count = 0
 
 for item_name, amount in item_drop_dict.items():
-    if count == 20:
-        if request_count != 0:
+    if count == 20 and request_count != 0:
             # steam will block you after too many requests
             for i in range(60):
                 os.system('cls' if os.name == 'nt' else 'clear')
@@ -192,7 +191,7 @@ for item_name, amount in item_drop_dict.items():
 
     request_count -= 1
     count += 1
-    print(f"{request_count} requests left.")
+    print(f"{request_count} requests left ({round(100 - (request_count / end_request_count * 100), 2)}% completed)")
     time.sleep(0.3)
     act_request_time.append((time.time() - start_time))
 
