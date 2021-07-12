@@ -7,7 +7,7 @@ import time
 import locale
 import time
 import functions
-
+import write_fails
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -184,10 +184,10 @@ for item_name, amount in item_drop_dict.items():
                 steam_price = float(formatted_price) * float(amount)
                 item_price_list.append(steam_price)
         except:
-            fail_list.append(item_name)
+            write_fails.append_failed_items(item_name, response.status_code, request_count)
 
     else:
-        fail_list.append(item_name)  # remove later, only for testing
+        write_fails.append_failed_items(item_name, response.status_code, request_count)
 
     request_count -= 1
     count += 1
@@ -199,10 +199,7 @@ rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
 os.system('cls' if os.name == 'nt' else 'clear')
-# only for testing/debugging, remove later
-if len(fail_list) > 0:
-    for item in fail_list:
-        print(f"Failed to get price for {item}")
+
 
 print(f"You opened {to_open} cases for a total of {end_request_count} unique skins.")
 print(f"Investment: ${rounded_cash}")
