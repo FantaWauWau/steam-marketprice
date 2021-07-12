@@ -157,17 +157,18 @@ fail_list = []
 item_price_list = []
 act_request_time = []
 count = 0
+
 for item_name, amount in item_drop_dict.items():
-    count += 1
     if count == 20:
-        # steam will block you after too many requests
-        for i in range(60):
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print(f"{i - 60} seconds left until next request.")
-            time.sleep(1)
-        os.system('cls' if os.name == 'nt' else 'clear')
-        print("New requests are being sent...")
-        count = 0
+        if request_count != 0:
+            # steam will block you after too many requests
+            for i in range(60):
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(f"{i - 60} seconds left until next request.")
+                time.sleep(1)
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("New requests are being sent...")
+                count = 0
     start_time = time.time()
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
                             "appid=730&currency=1&market_hash_name=" + item_name)
@@ -188,7 +189,9 @@ for item_name, amount in item_drop_dict.items():
 
     else:
         fail_list.append(item_name)  # remove later, only for testing
+
     request_count -= 1
+    count += 1
     print(f"{request_count} requests left.")
     time.sleep(0.3)
     act_request_time.append((time.time() - start_time))
@@ -238,9 +241,6 @@ with open('complete_results.csv', 'w') as csvfile:
     #os.remove('cache.csv')
 
 
-print(f"Estimated time: {round(estimated_time, 2)}")
-
-
 with open('est_time.csv', 'a', newline='') as file:
     fieldnames = ['act_request_time']
     writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -255,8 +255,6 @@ with open('est_time.csv', 'r') as file:
     for row in reader:
         length_list.append(row['act_request_time'])
         total_act_time += float(row['act_request_time'])
-print(len(length_list))
 
-
-average_time_request = (total_act_time / len(length_list))
-print(f"Average time for a request is: {average_time_request}")
+# average_time_request = (total_act_time / len(length_list))
+# print(f"Average time for a request is: {average_time_request}")
