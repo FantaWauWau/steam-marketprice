@@ -1,5 +1,4 @@
 skin_name,request_count,response_code,http_status_code
-0,0,0,0
 SG 553 | Wave Spray (Battle-Scarred),262,502,Bad Gateway
 ★ M9 Bayonet | Boreal Forest (Battle-Scarred),155,502,Bad Gateway
 StatTrak™ Galil AR | Shattered (Factory New),78,502,Bad Gateway
@@ -254,4 +253,8 @@ StatTrak™ MAC-10 | Ultraviolet (Field-Tested),49,429,Too many requests
 StatTrak™ MAC-10 | Ultraviolet (Minimal Wear),48,429,Too many requests
 StatTrak™ MAC-10 | Ultraviolet (Factory New),47,429,Too many requests
 StatTrak™ USP-S | Blood Tiger (Field-Tested),46,429,Too many requests
-G3SG1 | Demeter (Factory New),70,429,Too many requests
+MAC-10 | Graven (Well-Worn),18,429,Too many requests
+Galil AR | Shattered (Factory New),29,429,Too many requests
+StatTrak™ Dual Berettas | Black Limba (Factory New),8,502,Bad Gateway
+StatTrak™ Nova | Tempest (Field-Tested),7,502,Bad Gateway
+StatTrak™ Nova | Tempest (Minimal Wear),6,502,Bad Gateway
