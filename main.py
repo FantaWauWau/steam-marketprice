@@ -213,7 +213,7 @@ print(f"Return on invest: ${rounded_result}")
 
 current_results = []
 results = []
-
+print("Hello!")
 with open('complete_results.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
