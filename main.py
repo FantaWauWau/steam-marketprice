@@ -149,7 +149,7 @@ else:
 
 print(f"Requesting prices for {request_count} unique skins.")
 print(f"Estimated time: {round(estimated_time, 2)}s")
-
+total_time = time.time()
 end_request_count = request_count
 
 # remove fail list later, only for testing
@@ -218,10 +218,17 @@ with open('complete_results.csv', 'r') as csvfile:
         else:
             results.append(row)
 
+total_opened = int(results[0]["total_opened"]) + to_open
+total_spent = float(results[0]["total_spent"]) + rounded_cash
+return_on_invest = float(results[0]["return_on_invest"]) + rounded_result
+print(f"Estimated Time: {round(estimated_time, 2)}")
+print(f"Actual Time: {round(time.time() - total_time, 2)}")
+
 current_results.append({'case_name': case_name,
-            'total_opened': int(results[0]["total_opened"]) + to_open,
-            'total_spent': round(float(results[0]["total_spent"]) + rounded_cash, 2),
-            'return_on_invest': round(float(results[0]["return_on_invest"]) + rounded_result, 2)})
+                        'total_opened': total_opened,
+                        'total_spent': round(total_spent, 2),
+                        'return_on_invest': round(return_on_invest, 2)
+                    })
 
 current_results.reverse()
 with open('complete_results.csv', 'w') as csvfile:

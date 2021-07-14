@@ -1,4 +1,5 @@
 import csv
+from http_codes import http_status_codes
 
 # writes failed requests/items into a file
 def append_failed_items(skin_name, response_code, request_count):
@@ -13,6 +14,10 @@ def append_failed_items(skin_name, response_code, request_count):
         to_write["request_count"] = request_count
 
     with open('failed_items.csv', 'a', newline='', encoding='utf-8') as file:
-        fieldnames = ['skin_name', 'response_code', 'request_count']
+        fieldnames = ['skin_name', 'request_count', 'response_code', 'http_status_code']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writerow({'skin_name': to_write['skin_name'], 'response_code': to_write['response_code'], 'request_count': to_write['request_count']})
+        writer.writerow({'skin_name': to_write['skin_name'],
+                         'request_count': to_write['request_count'],
+                         'response_code': to_write['response_code'],
+                         'http_status_code': http_status_codes[response_code]
+                    })
