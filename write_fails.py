@@ -22,5 +22,3 @@ def append_failed_items(skin_name, response_code, request_count):
                          'response_code': to_write['response_code'],
                          'http_status_code': http_status_codes[response_code]
                     })
-
-print("Luca ist uwuw cute, der Pinguuuu hehehe")
