@@ -171,6 +171,8 @@ for item_name, amount in item_drop_dict.items():
     start_time = time.time()
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
                             "appid=730&currency=1&market_hash_name=" + item_name)
+    print(response.status_code)
+    print(response.json())
     if response.status_code == 200:  # 200 == successful request
         steam_response = response.json()
         try:
@@ -185,9 +187,11 @@ for item_name, amount in item_drop_dict.items():
                 item_price_list.append(steam_price)
         except:
             write_fails.append_failed_items(item_name, response.status_code, request_count)
+            print("FAIL")
 
     else:
         write_fails.append_failed_items(item_name, response.status_code, request_count)
+        print("FAIL")
 
     request_count -= 1
     count += 1
