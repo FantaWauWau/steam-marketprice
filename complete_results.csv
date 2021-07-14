@@ -1,6 +1,6 @@
 case_name,total_opened,total_spent,return_on_invest
+phoenix_case.csv,20600,73494.0,-54420.35
 weapon_case.csv,11168,583433.44,-265340.91
-phoenix_case.csv,15600,55744.0,-45585.25
 esports_2013_winter_case.csv,55000,399650.0,-180635.83
 revolver_case.csv,260,706.6,-305.84
 bravo_case.csv,602802,25350291.12,-15217388.04
@@ -10,5 +10,5 @@ cs20_case.csv,0,0,0
 esports_2013_case.csv,50,2086.5,-1731.79
 winter_offensive_case.csv,10000,66900.0,-39034.85
 weapon_case_2.csv,5000,41300.0,-10749.03
-vanguard_case.csv,51315,175518.25,-72275.95
 esports_2014_summer_case.csv,20000,147900.0,-78274.42
+vanguard_case.csv,52315,178988.25,-73131.91
