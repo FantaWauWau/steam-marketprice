@@ -1,5 +1,7 @@
 import csv
 import random
+import os
+from types import new_class
 
 # dictionary for formatting case name for price request to steam
 market_case_name = {
@@ -190,3 +192,27 @@ def calculate_avg_request_time():
         return True, average
     except:
         return False
+
+# add if csv file exists, else create them
+
+def file_check():
+    if not os.path.isfile('est_time.csv'):
+        with open('est_time.csv', 'w', newline='') as file:
+            fieldnames = ['act_request_time']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+
+    if not os.path.isfile('failed_items.csv'):
+        with open('failed_items.csv', 'w', newline='') as file:
+            fieldnames = ['skin_name', 'request_count', 'response_code', 'http_status_code']
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerow({'skin_name': 0, 'request_count': 0, 'response_code': 0, 'http_status_code': 0})
+
+    if not os.path.isfile('complete_results.csv'):
+        with open('complete_results.csv', 'w', newline='') as file:
+            fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
+            writer = csv.DictWriter(file, fieldnames=fieldnames)
+            writer.writeheader()
+            for item in market_case_name:
+                writer.writerow({'case_name': item, 'total_opened': 0, 'total_spent': 0, 'return_on_invest': 0})

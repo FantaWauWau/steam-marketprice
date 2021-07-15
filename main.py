@@ -19,6 +19,7 @@ def add_drop_for_quality(color):
     else:
         drop_amount_by_quality[color] += 1
 
+functions.file_check()
 
 # stores the amount of drops for each item quality
 drop_amount_by_quality = {
