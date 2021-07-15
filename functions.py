@@ -1,7 +1,6 @@
 import csv
 import random
 import os
-from types import new_class
 
 # dictionary for formatting case name for price request to steam
 market_case_name = {
@@ -91,7 +90,7 @@ def vanilla_check(skin_name: str):
         Tuple of True, skin name without wear if skin is vanilla.
         False if the skin is not a vanilla, original skin name.
     """
-    with open("vanilla_knife.csv", 'r', encoding='utf-8') as csvfile:
+    with open("Cases/vanilla_knife.csv", 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
             if skin_name == row["skin_name"]:
@@ -111,7 +110,7 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
     Returns:
         Dictionary with all skin names + wear with amount of drops for each.
     """
-    # creates a list of dictionaries with content of csv file (opened case name)
+    # creates a list of dicts with content of csv file (opened case name)
     item_list = []
     with open(f"Cases/{case_name}", 'r', encoding='utf-8') as csvfile:
         reader = csv.DictReader(csvfile)
@@ -204,15 +203,41 @@ def file_check():
 
     if not os.path.isfile('failed_items.csv'):
         with open('failed_items.csv', 'w', newline='') as file:
-            fieldnames = ['skin_name', 'request_count', 'response_code', 'http_status_code']
+            fieldnames = [
+                        'skin_name',
+                        'request_count',
+                        'response_code',
+                        'http_status_code'
+                        ]
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
-            writer.writerow({'skin_name': 0, 'request_count': 0, 'response_code': 0, 'http_status_code': 0})
+            writer.writerow({
+                        'skin_name': 0,
+                        'request_count': 0,
+                        'response_code': 0,
+                        'http_status_code': 0
+                        })
 
     if not os.path.isfile('complete_results.csv'):
         with open('complete_results.csv', 'w', newline='') as file:
-            fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
+            fieldnames = [
+                    "case_name",
+                    "total_opened",
+                    "total_spent",
+                    "return_on_invest"
+                    ]
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             for item in market_case_name:
-                writer.writerow({'case_name': item, 'total_opened': 0, 'total_spent': 0, 'return_on_invest': 0})
+                writer.writerow({
+                            'case_name': item,
+                            'total_opened': 0,
+                            'total_spent': 0,
+                            'return_on_invest': 0
+                            })
+
+    # cache.csv is created without condition, always needed empty on start.
+    with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
+        fieldnames = ["skin_name", "amount_of_drops"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()

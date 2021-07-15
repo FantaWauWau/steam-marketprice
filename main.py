@@ -36,16 +36,10 @@ drop_amount_by_quality = {
     "stat_yellow": 0
     }
 
-# creates csv file to store items names + drop amount
-with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
-    fieldnames = ["skin_name", "amount_of_drops"]
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
-
 
 # case to open
 while True:
-    case_name = input("Enter Case name to open: ")
+    case_name = input("Enter Case name to open: ").casefold()
     if case_name[-4:] != ".csv":
         case_name = case_name + ".csv"
 
