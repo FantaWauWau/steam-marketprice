@@ -140,15 +140,26 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
+try:
+    average_request = functions.calculate_avg_request_time()[1]
+except:
+    print("Something went wrong in calculating average request time.")
+    print("Falling back to standard value of 0.7")
+    average_request = 0.7
 
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
-    estimated_time = (request_count * 0.6)
+    estimated_time = (request_count * average_request)
 else:
-    estimated_time = (amount_of_timeouts * 60) + (request_count * 0.3) + 10
+    estimated_time = (amount_of_timeouts * 60) + (request_count * average_request)
+
+if estimated_time > 60:
+    minutes = estimated_time // 60
+    seconds = round(estimated_time - minutes * 60, 2)
 
 print(f"Requesting prices for {request_count} unique skins.")
-print(f"Estimated time: {round(estimated_time, 2)}s")
+print(f"Estimated Time: {minutes} mins and {seconds}s")
+
 total_time = time.time()
 end_request_count = request_count
 
@@ -156,6 +167,7 @@ end_request_count = request_count
 fail_list = []
 item_price_list = []
 act_request_time = []
+
 count = 0
 
 for item_name, amount in item_drop_dict.items():
@@ -171,30 +183,27 @@ for item_name, amount in item_drop_dict.items():
     start_time = time.time()
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
                             "appid=730&currency=1&market_hash_name=" + item_name)
-    print(response.status_code)
-    try:
-        print(response.json())
-    except:
-        print("FAIL")
-    if response.status_code == 200:  # 200 == successful request
-        steam_response = response.json()
-        try:
-            if "lowest_price" in steam_response:
-                formatted_price = steam_response["lowest_price"][1:]  # remove $
-            elif "median_price" in steam_response:
-                formatted_price = steam_response["median_price"][1:]
-            if "," in formatted_price:
-                item_price_list.append(locale.atof(formatted_price))
-            else:
-                steam_price = float(formatted_price) * float(amount)
-                item_price_list.append(steam_price)
-        except:
-            write_fails.append_failed_items(item_name, response.status_code, request_count)
-            print("FAIL")
 
-    else:
+    try:
+        steam_response = response.json()
+    except:
+        fail_list.append((item_name, amount))
         write_fails.append_failed_items(item_name, response.status_code, request_count)
-        print("FAIL")
+
+    try:
+        if "lowest_price" in steam_response:
+            formatted_price = steam_response["lowest_price"][1:]  # remove $
+        elif "median_price" in steam_response:
+            formatted_price = steam_response["median_price"][1:]
+        if "," in formatted_price:
+            item_price_list.append(locale.atof(formatted_price))
+        else:
+            steam_price = float(formatted_price) * float(amount)
+            item_price_list.append(steam_price)
+    except:
+        write_fails.append_failed_items(item_name, response.status_code, request_count)
+        fail_list.append((item_name, amount))
+
 
     request_count -= 1
     count += 1
@@ -202,54 +211,72 @@ for item_name, amount in item_drop_dict.items():
     time.sleep(0.3)
     act_request_time.append((time.time() - start_time))
 
-rounded_cash = round(cash, 2)
-rounded_sum = round(sum(item_price_list), 2)
-rounded_result = round(sum(item_price_list) - rounded_cash, 2)
-os.system('cls' if os.name == 'nt' else 'clear')
-
-
-print(f"You opened {to_open} cases for a total of {end_request_count} unique skins.")
-print(f"Investment: ${rounded_cash}")
-print(f"Return: ${rounded_sum}")
-print(f"Return on invest: ${rounded_result}")
-
-
-current_results = []
-results = []
-
-with open('complete_results.csv', 'r') as csvfile:
-    reader = csv.DictReader(csvfile)
-    for row in reader:
-        if row["case_name"] != case_name:
-            current_results.append(row)
-        else:
-            results.append(row)
-
-total_opened = int(results[0]["total_opened"]) + to_open
-total_spent = float(results[0]["total_spent"]) + rounded_cash
-return_on_invest = float(results[0]["return_on_invest"]) + rounded_result
-print(f"Estimated Time: {round(estimated_time, 2)}")
-print(f"Actual Time: {round(time.time() - total_time, 2)}")
-
-current_results.append({'case_name': case_name,
-                        'total_opened': total_opened,
-                        'total_spent': round(total_spent, 2),
-                        'return_on_invest': round(return_on_invest, 2)
-                    })
-
-current_results.reverse()
-with open('complete_results.csv', 'w') as csvfile:
-    fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
-    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    writer.writeheader()
-    for row in current_results:
-        writer.writerow(row)
 
 # deletes cache files
 # useful for debugging
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
 
+# average_time_request = (total_act_time / len(length_list))
+# print(f"Average time for a request is: {average_time_request}")
+
+end_fail_list = []
+request_count = len(fail_list)
+print(f"Failed to get item prices for {request_count} items.")
+print("Starting second attempt...")
+time.sleep(3)
+for i in range(60):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print(f"{i - 60} seconds left until next request.")
+    time.sleep(1)
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("New requests are being sent...")
+
+# reused for loop. todo: write function for requests
+for item_name, amount in fail_list:
+    if count == 20 and request_count != 0:
+        # steam will block you after too many requests
+        for i in range(60):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"{i - 60} seconds left until next request.")
+            time.sleep(1)
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("New requests are being sent...")
+            count = 0
+    response = requests.get("https://steamcommunity.com/market/priceoverview/?"
+                            "appid=730&currency=1&market_hash_name=" + item_name)
+    try:
+        steam_response = response.json()
+    except:
+        write_fails.append_failed_items(item_name, response.status_code, request_count)
+        end_fail_list.append(item_name)
+
+    try:
+        if "lowest_price" in steam_response:
+            formatted_price = steam_response["lowest_price"][1:]  # remove $
+        elif "median_price" in steam_response:
+            formatted_price = steam_response["median_price"][1:]
+        if "," in formatted_price:
+            item_price_list.append(locale.atof(formatted_price))
+        else:
+            steam_price = float(formatted_price) * float(amount)
+            item_price_list.append(steam_price)
+        print(f"Got price for {item_name} on second attempt!")
+    except:
+        write_fails.append_failed_items(item_name, response.status_code, request_count)
+        end_fail_list.append(item_name)
+
+    count += 1
+    request_count -= 1
+    percentage = round(100 - (request_count / end_request_count * 100), 2)
+    print(f"{request_count} requests left ({percentage}% completed)")
+    time.sleep(0.3)
+
+if len(end_fail_list) != 0:
+    print("Failed twice to get price for: ")
+    for item in end_fail_list:
+        print(item)
+    time.sleep(5)
 
 with open('est_time.csv', 'a', newline='') as file:
     fieldnames = ['act_request_time']
@@ -266,5 +293,43 @@ with open('est_time.csv', 'r') as file:
         length_list.append(row['act_request_time'])
         total_act_time += float(row['act_request_time'])
 
-# average_time_request = (total_act_time / len(length_list))
-# print(f"Average time for a request is: {average_time_request}")
+rounded_cash = round(cash, 2)
+rounded_sum = round(sum(item_price_list), 2)
+rounded_result = round(sum(item_price_list) - rounded_cash, 2)
+os.system('cls' if os.name == 'nt' else 'clear')
+
+
+print(f"You opened {to_open} cases for a total of {end_request_count} unique skins.")
+print(f"Investment: ${rounded_cash}")
+print(f"Return: ${rounded_sum}")
+print(f"Return on invest: ${rounded_result}")
+
+current_results = []
+results = []
+
+with open('complete_results.csv', 'r') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        if row["case_name"] != case_name:
+            current_results.append(row)
+        else:
+            results.append(row)
+
+total_opened = int(results[0]["total_opened"]) + to_open
+total_spent = float(results[0]["total_spent"]) + rounded_cash
+return_on_invest = float(results[0]["return_on_invest"]) + rounded_result
+
+
+current_results.append({'case_name': case_name,
+                        'total_opened': total_opened,
+                        'total_spent': round(total_spent, 2),
+                        'return_on_invest': round(return_on_invest, 2)
+                    })
+
+current_results.reverse()
+with open('complete_results.csv', 'w') as csvfile:
+    fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in current_results:
+        writer.writerow(row)
