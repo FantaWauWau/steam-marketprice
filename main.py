@@ -306,6 +306,8 @@ print(f"You opened {to_open} cases for a total of {end_request_count} unique ski
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
+print(sum(act_request_time))
+
 
 current_results = []
 results = []
