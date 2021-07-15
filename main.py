@@ -153,13 +153,17 @@ if amount_of_timeouts < 1:
 else:
     estimated_time = (amount_of_timeouts * 60) + (request_count * average_request)
 
+print(f"Requesting prices for {request_count} unique skins.")
 if estimated_time > 60:
     minutes = estimated_time // 60
     seconds = round(estimated_time - minutes * 60, 2)
-    print(seconds)
-print(f"Requesting prices for {request_count} unique skins.")
-print(f"Estimated Time: {int(minutes)} mins and {int(seconds)}s")
+    print(f"Estimated Time: {int(minutes)} mins and {int(seconds)}s")
+elif estimated_time == 60:
+    print("Estimated time is 1 minute.")
+else:
+    print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
 print()
+
 total_time = time.time()
 end_request_count = request_count
 
@@ -216,63 +220,62 @@ for item_name, amount in item_drop_dict.items():
 #if os.path.exists('cache.csv'):
     #os.remove('cache.csv')
 
-# average_time_request = (total_act_time / len(length_list))
-# print(f"Average time for a request is: {average_time_request}")
-
 end_fail_list = []
 request_count = len(fail_list)
-print(f"Failed to get item prices for {request_count} items.")
-print("Starting second attempt...")
-time.sleep(3)
-for i in range(60):
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print(f"{i - 60} seconds left until next request.")
-    time.sleep(1)
-    os.system('cls' if os.name == 'nt' else 'clear')
-    print("New requests are being sent...")
+if len(fail_list) > 0:
+    print(f"Failed to get item prices for {request_count} items.")
+    print("Starting second attempt...")
+    time.sleep(3)
 
-# reused for loop. todo: write function for requests
-for item_name, amount in fail_list:
-    if count == 20 and request_count != 0:
-        # steam will block you after too many requests
-        for i in range(60):
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print(f"{i - 60} seconds left until next request.")
-            time.sleep(1)
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print("New requests are being sent...")
-            count = 0
-    response = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                            "appid=730&currency=1&market_hash_name=" + item_name)
-    try:
-        steam_response = response.json()
-    except:
-        write_fails.append_failed_items(item_name, response.status_code, request_count)
-        end_fail_list.append(item_name)
-
-    try:
-        if "lowest_price" in steam_response:
-            formatted_price = steam_response["lowest_price"][1:]  # remove $
-        elif "median_price" in steam_response:
-            formatted_price = steam_response["median_price"][1:]
-        if "," in formatted_price:
-            item_price_list.append(locale.atof(formatted_price))
-        else:
-            steam_price = float(formatted_price) * float(amount)
-            item_price_list.append(steam_price)
-        print(f"Got price for {item_name} on second attempt!")
+    for i in range(60):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(f"{i - 60} seconds left until next request.")
         time.sleep(1)
-    except:
-        write_fails.append_failed_items(item_name, response.status_code, request_count)
-        end_fail_list.append(item_name)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("New requests are being sent...")
 
-    count += 1
-    request_count -= 1
-    percentage = round(100 - (request_count / end_request_count * 100), 2)
-    print(f"{request_count} requests left ({percentage}% completed)")
-    time.sleep(0.3)
+    # reused for loop. todo: write function for requests
+    for item_name, amount in fail_list:
+        if count == 20 and request_count != 0:
+            # steam will block you after too many requests
+            for i in range(60):
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(f"{i - 60} seconds left until next request.")
+                time.sleep(1)
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("New requests are being sent...")
+                count = 0
+        response = requests.get("https://steamcommunity.com/market/priceoverview/?"
+                                "appid=730&currency=1&market_hash_name=" + item_name)
+        try:
+            steam_response = response.json()
+        except:
+            write_fails.append_failed_items(item_name, response.status_code, request_count)
+            end_fail_list.append(item_name)
 
-if len(end_fail_list) != 0:
+        try:
+            if "lowest_price" in steam_response:
+                formatted_price = steam_response["lowest_price"][1:]  # remove $
+            elif "median_price" in steam_response:
+                formatted_price = steam_response["median_price"][1:]
+            if "," in formatted_price:
+                item_price_list.append(locale.atof(formatted_price))
+            else:
+                steam_price = float(formatted_price) * float(amount)
+                item_price_list.append(steam_price)
+            print(f"Got price for {item_name} on second attempt!")
+            time.sleep(1)
+        except:
+            write_fails.append_failed_items(item_name, response.status_code, request_count)
+            end_fail_list.append(item_name)
+
+        count += 1
+        request_count -= 1
+        percentage = round(100 - (request_count / end_request_count * 100), 2)
+        print(f"{request_count} requests left ({percentage}% completed)")
+        time.sleep(0.3)
+
+if len(end_fail_list) > 0:
     print("Failed twice to get price for: ")
     for item in end_fail_list:
         print(item)
