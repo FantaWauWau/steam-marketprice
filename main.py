@@ -7,7 +7,7 @@ import time
 import locale
 import time
 import functions
-import write_fails
+
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -187,7 +187,7 @@ for item_name, amount in item_drop_dict.items():
         steam_response = response.json()
     except:
         fail_list.append((item_name, amount))
-        write_fails.append_failed_items(item_name, response.status_code, request_count)
+        functions.append_failed_items(item_name, response.status_code, request_count)
 
     try:
         if "lowest_price" in steam_response:
@@ -200,7 +200,7 @@ for item_name, amount in item_drop_dict.items():
             steam_price = float(formatted_price) * float(amount)
             item_price_list.append(steam_price)
     except:
-        write_fails.append_failed_items(item_name, response.status_code, request_count)
+        functions.append_failed_items(item_name, response.status_code, request_count)
         fail_list.append((item_name, amount))
 
     request_count -= 1
@@ -245,7 +245,7 @@ if len(fail_list) > 0:
         try:
             steam_response = response.json()
         except:
-            write_fails.append_failed_items(item_name, response.status_code, request_count)
+            functions.append_failed_items(item_name, response.status_code, request_count)
             end_fail_list.append(item_name)
 
         try:
@@ -261,7 +261,7 @@ if len(fail_list) > 0:
             print(f"Got price for {item_name} on second attempt!")
             time.sleep(1)
         except:
-            write_fails.append_failed_items(item_name, response.status_code, request_count)
+            functions.append_failed_items(item_name, response.status_code, request_count)
             end_fail_list.append(item_name)
 
         count += 1
