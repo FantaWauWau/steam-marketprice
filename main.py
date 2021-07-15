@@ -156,10 +156,10 @@ else:
 if estimated_time > 60:
     minutes = estimated_time // 60
     seconds = round(estimated_time - minutes * 60, 2)
-
+print(seconds)
 print(f"Requesting prices for {request_count} unique skins.")
-print(f"Estimated Time: {minutes} mins and {seconds}s")
-
+print(f"Estimated Time: {int(minutes)} mins and {int(seconds)}s")
+print()
 total_time = time.time()
 end_request_count = request_count
 
@@ -203,7 +203,6 @@ for item_name, amount in item_drop_dict.items():
     except:
         write_fails.append_failed_items(item_name, response.status_code, request_count)
         fail_list.append((item_name, amount))
-
 
     request_count -= 1
     count += 1
@@ -262,6 +261,7 @@ for item_name, amount in fail_list:
             steam_price = float(formatted_price) * float(amount)
             item_price_list.append(steam_price)
         print(f"Got price for {item_name} on second attempt!")
+        time.sleep(1)
     except:
         write_fails.append_failed_items(item_name, response.status_code, request_count)
         end_fail_list.append(item_name)
