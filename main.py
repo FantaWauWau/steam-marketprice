@@ -156,7 +156,7 @@ else:
 if estimated_time > 60:
     minutes = estimated_time // 60
     seconds = round(estimated_time - minutes * 60, 2)
-print(seconds)
+    print(seconds)
 print(f"Requesting prices for {request_count} unique skins.")
 print(f"Estimated Time: {int(minutes)} mins and {int(seconds)}s")
 print()
