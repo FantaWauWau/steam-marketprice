@@ -173,3 +173,20 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
                 continue
 
     return skin_name_with_wear
+
+
+def calculate_avg_request_time():
+    """Calculates average of all response times of user"""
+    try:
+        total_values = -1  # -1 for header in csv
+        sum_of_time = 0
+        with open('est_time.csv', 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                total_values += 1
+                sum_of_time += float(row['act_request_time'])
+
+        average = sum_of_time / total_values
+        return True, average
+    except:
+        return False
