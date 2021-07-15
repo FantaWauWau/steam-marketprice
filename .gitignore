@@ -1,2 +1,5 @@
 __pycache__
 cache.csv
+failed_items.csv
+complete_results.csv
+est_time.csv
