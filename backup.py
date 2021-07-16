@@ -167,25 +167,45 @@ fail_list = []
 item_price_list = []
 act_request_time = []
 
-timeout_count = 0
+count = 0
 
 for item_name, amount in item_drop_dict.items():
-    if timeout_count == 20 and request_count != 0:
-        functions.timeout()
-        timeout_count = 0
+    if count == 20 and request_count != 0:
+            # steam will block you after too many requests
+            for i in range(60):
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(f"{i - 60} seconds left until next request.")
+                time.sleep(1)
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("New requests are being sent...")
+                count = 0
 
     start_time = time.time()
-    # boolean = returned bool of function
-    # response_value = either price of item * dropped amount or if boolean False http response code.
-    boolean, response_value = functions.steam_request(item_name, amount)
-    if boolean:
-        item_price_list.append(response_value)
-    else:
-        functions.append_failed_items(item_name, response_value, request_count)
+    response = requests.get("https://steamcommunity.com/market/priceoverview/?"
+                            "appid=730&currency=1&market_hash_name=" + item_name)
+
+    try:
+        steam_response = response.json()
+    except:
+        fail_list.append((item_name, amount))
+        functions.append_failed_items(item_name, response.status_code, request_count)
+
+    try:
+        if "lowest_price" in steam_response:
+            formatted_price = steam_response["lowest_price"][1:]  # remove $
+        elif "median_price" in steam_response:
+            formatted_price = steam_response["median_price"][1:]
+        if "," in formatted_price:
+            item_price_list.append(float(locale.atof(formatted_price) * float(amount)))
+        else:
+            steam_price = float(formatted_price) * float(amount)
+            item_price_list.append(steam_price)
+    except:
+        functions.append_failed_items(item_name, response.status_code, request_count)
         fail_list.append((item_name, amount))
 
     request_count -= 1
-    timeout_count += 1
+    count += 1
     print(f"{request_count} requests left ({round(100 - (request_count / end_request_count * 100), 2)}% completed)")
     time.sleep(0.3)
     act_request_time.append((time.time() - start_time))
@@ -203,40 +223,74 @@ if len(fail_list) > 0:
     print("Starting second attempt...")
     time.sleep(3)
 
-    functions.timeout()
+    for i in range(60):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(f"{i - 60} seconds left until next request.")
+        time.sleep(1)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("New requests are being sent...")
 
     # reused for loop. todo: write function for requests
     for item_name, amount in fail_list:
-        if timeout_count == 20 and request_count != 0:
-            functions.timeout()
-            timeout_count = 0
-
-        start_time = time.time()
-        # boolean = returned bool of function
-        # response_value = either price of item * dropped amount or if boolean False http response code.
-        boolean, response_value = functions.steam_request(item_name, amount)
-        if boolean:
-            item_price_list.append(response_value)
-            print(f"Got price for {item_name} on second attempt!")
-            time.sleep(1)
-        else:
-            functions.append_failed_items(item_name, response_value, request_count)
+        if count == 20 and request_count != 0:
+            # steam will block you after too many requests
+            for i in range(60):
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print(f"{i - 60} seconds left until next request.")
+                time.sleep(1)
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("New requests are being sent...")
+                count = 0
+        response = requests.get("https://steamcommunity.com/market/priceoverview/?"
+                                "appid=730&currency=1&market_hash_name=" + item_name)
+        try:
+            steam_response = response.json()
+        except:
+            functions.append_failed_items(item_name, response.status_code, request_count)
             end_fail_list.append(item_name)
 
+        try:
+            if "lowest_price" in steam_response:
+                formatted_price = steam_response["lowest_price"][1:]  # remove $
+            elif "median_price" in steam_response:
+                formatted_price = steam_response["median_price"][1:]
+            if "," in formatted_price:
+                item_price_list.append(locale.atof(formatted_price))
+            else:
+                steam_price = float(formatted_price) * float(amount)
+                item_price_list.append(steam_price)
+            print(f"Got price for {item_name} on second attempt!")
+            time.sleep(1)
+        except:
+            functions.append_failed_items(item_name, response.status_code, request_count)
+            end_fail_list.append(item_name)
+
+        count += 1
         request_count -= 1
-        timeout_count += 1
-        print(f"{request_count} requests left ({round(100 - (request_count / end_request_count * 100), 2)}% completed)")
+        percentage = round(100 - (request_count / end_request_count * 100), 2)
+        print(f"{request_count} requests left ({percentage}% completed)")
         time.sleep(0.3)
-        act_request_time.append((time.time() - start_time))
 
+if len(end_fail_list) > 0:
+    print("Failed twice to get price for: ")
+    for item in end_fail_list:
+        print(item)
+    time.sleep(5)
 
-# writes requests times for current run in csv
 with open('est_time.csv', 'a', newline='') as file:
     fieldnames = ['act_request_time']
     writer = csv.DictWriter(file, fieldnames=fieldnames)
     for time in act_request_time:
         writer.writerow({'act_request_time': time})
 
+
+length_list = []
+total_act_time = 0
+with open('est_time.csv', 'r') as file:
+    reader = csv.DictReader(file)
+    for row in reader:
+        length_list.append(row['act_request_time'])
+        total_act_time += float(row['act_request_time'])
 
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
@@ -248,7 +302,8 @@ print(f"You opened {to_open} cases for a total of {end_request_count} unique ski
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
-print(round(sum(act_request_time), 2))
+print(sum(act_request_time))
+
 
 current_results = []
 results = []
@@ -279,8 +334,3 @@ with open('complete_results.csv', 'w') as csvfile:
     writer.writeheader()
     for row in current_results:
         writer.writerow(row)
-
-if len(end_fail_list) > 0:
-    print("Failed twice to get price for: ")
-    for item in end_fail_list:
-        print(item)

@@ -1,16 +1,32 @@
 import csv
 import random
 import os
+import requests
+import locale
+import time
 from http_codes import http_status_codes
 
 # dictionary for formatting case name for price request to steam
 market_case_name = {
     "bravo_case.csv": "Operation Bravo Case",
+    "breakout_case.csv": "Operation Breakout Case",
+    "chroma_case": "Chroma Case",
+    "chroma_2_case.csv": "Chroma 2 Case",
+    "chroma_3_case.csv": "Chroma 3 Case",
+    "cs20_case.csv": "CS20 Case",
     "esports_2013_case.csv": "eSports 2013 Case",
     "esports_2013_winter_case.csv": "eSports 2013 Winter Case",
     "esports_2014_summer_case.csv": "eSports 2014 Summer Case",
+    "falchion_case.csv": "Falchion Case",
+    "gamma_case.csv": "Gamma Case",
+    "gamma_2_case.csv": "Gamma 2 Case",
+    "huntsman_case.csv": "Huntsman Weapon Case",
+    "prisma_case.csv": "Prisma Case",
+    "prisma_2_case.csv": "Prisma 2 Case",
     "phoenix_case.csv": "Operation Phoenix Weapon Case",
     "revolver_case.csv": "Revolver Case",
+    "shadow_case.csv": "Shadow Case",
+    "spectrum_2_case.csv": "Spectrum 2 Case",
     "vanguard_case.csv": "Operation Vanguard Weapon Case",
     "weapon_case_2.csv": "CS:GO Weapon Case 2",
     "weapon_case_3.csv": "CS:GO Weapon Case 3",
@@ -202,23 +218,6 @@ def file_check():
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
 
-    if not os.path.isfile('failed_items.csv'):
-        with open('failed_items.csv', 'w', newline='') as file:
-            fieldnames = [
-                        'skin_name',
-                        'request_count',
-                        'response_code',
-                        'http_status_code'
-                        ]
-            writer = csv.DictWriter(file, fieldnames=fieldnames)
-            writer.writeheader()
-            writer.writerow({
-                        'skin_name': 0,
-                        'request_count': 0,
-                        'response_code': 0,
-                        'http_status_code': 0
-                        })
-
     if not os.path.isfile('complete_results.csv'):
         with open('complete_results.csv', 'w', newline='') as file:
             fieldnames = [
@@ -237,11 +236,27 @@ def file_check():
                             'return_on_invest': 0
                             })
 
-    # cache.csv is created without condition, always needed empty on start.
+    # cache.csv & failed_items.csv are always created new on start.
     with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = ["skin_name", "amount_of_drops"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
+
+    with open('failed_items.csv', 'w', newline='') as file:
+        fieldnames = [
+                    'skin_name',
+                    'request_count',
+                    'response_code',
+                    'http_status_code'
+                    ]
+        writer = csv.DictWriter(file, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerow({
+                    'skin_name': 0,
+                    'request_count': 0,
+                    'response_code': 0,
+                    'http_status_code': 0
+                    })
 
 
 def append_failed_items(skin_name, response_code, request_count):
@@ -264,3 +279,42 @@ def append_failed_items(skin_name, response_code, request_count):
                          'response_code': to_write['response_code'],
                          'http_status_code': http_status_codes[response_code]
                     })
+
+
+def steam_request(item_name, amount):
+    """Sents request to steam for item price.
+
+    Returns:
+        (Tuple)
+        True, price * amount
+        False, http response code.
+    """
+    response = requests.get("https://steamcommunity.com/market/priceoverview/?"
+                            "appid=730&currency=1&market_hash_name=" + item_name)
+
+    try:
+        steam_response = response.json()
+    except:
+        return False, response.status_code
+
+    try:
+        if "lowest_price" in steam_response:
+            formatted_price = steam_response["lowest_price"][1:]  # remove $
+        elif "median_price" in steam_response:
+            formatted_price = steam_response["median_price"][1:]
+        if "," in formatted_price:
+            return True, float(locale.atof(formatted_price) * float(amount))
+        else:
+            return True, float(formatted_price) * float(amount)
+    except:
+        return False, response.status_code
+
+
+def timeout():
+    """Timeout for 60seconds. Used for pausing steam requests."""
+    for i in range(60):
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print(f"{i - 60} seconds left until next request.")
+        time.sleep(1)
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("New requests are being sent...")
