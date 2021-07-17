@@ -12,9 +12,7 @@ from variables import market_case_name, drop_amount_by_quality, case_name_into_c
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
-
 functions.file_check()
-
 
 # case to open
 while True:
@@ -33,7 +31,6 @@ while True:
 
 # get current case price
 formatted_case_name = market_case_name[case_name]  # actual case name on market
-print(formatted_case_name)
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
@@ -69,6 +66,15 @@ while True:
         print("Something went wrong! \n"
               "Please enter amount of cases to open or for example 50$.")
 
+# glove cases check, stattrack needs to be removed from drops
+glove_case_list = ["Glove Case", "Operation Hydra Case", "Clutch Case",
+                   "Operation Broken Fang Case", "Snakebite Case"]
+
+is_glove_case = False
+for case in glove_case_list:
+    if case == case_name:
+        is_glove_case = True
+
 # calculates amount of drops by quality for amount of cases to open
 opened = 0
 while opened < to_open:
@@ -92,6 +98,9 @@ while opened < to_open:
     else:
         color = "yellow"
         drop = functions.add_drop_for_quality(color)
+        # gloves
+        if is_glove_case and "stat_" in drop:
+            drop = drop[5:] # removes stat_
         drop_amount_by_quality[drop] += 1
     opened += 1
 
