@@ -303,7 +303,7 @@ def steam_request(item_name, amount):
        If steam returns a price its multiplied by the dropped 'amount'.
 
     Returns:
-        (Tuple)
+        A Tuple, consisting of (bool, value)
         True, price * amount
         False, http response code.
     """
