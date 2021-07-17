@@ -119,6 +119,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
+# calculate avg. request time for local user values, if fails standard value is used.
 try:
     average_request = functions.calculate_avg_request_time()[1]
 except:
@@ -126,13 +127,15 @@ except:
     print("Falling back to standard value of 0.7")
     average_request = 0.7
 
+# calculates how often the program will timeout, when requesting
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
-    estimated_time = (request_count * average_request)
+    estimated_time = request_count * average_request
 else:
     estimated_time = (amount_of_timeouts * 60) + (request_count * average_request)
 
 print(f"Requesting prices for {request_count} unique skins.")
+# calculates estimated time to sent all requests and process them
 if estimated_time > 60:
     minutes = estimated_time // 60
     seconds = round(estimated_time - minutes * 60, 2)
@@ -149,7 +152,7 @@ fail_list = []
 item_price_list = []
 act_request_time = []
 
-
+# loops through the dict of {item: amount} of drops and sents price request
 for item_name, amount in item_drop_dict.items():
     if timeout_count == 20 and request_count != 0:
         functions.timeout()
@@ -171,22 +174,20 @@ for item_name, amount in item_drop_dict.items():
     act_request_time.append((time.time() - start_time))
 
 
-sec_attempt_fails = []
+failed_twice_list = []
 request_count = len(fail_list)
 if len(fail_list) > 0:
     print(f"Failed to get item prices for {request_count} items.")
     print("Starting second attempt...")
     time.sleep(3)
     functions.timeout()
-
+    # loops through failed items and first request and reattempts to get price
     for item_name, amount in fail_list:
         if timeout_count == 20 and request_count != 0:
             functions.timeout()
             timeout_count = 0
 
         start_time = time.time()
-        # request_success = returned bool of function
-        # response_value = either price of item * dropped amount or if False http response code.
         request_success, response_value = functions.steam_request(item_name, amount)
         if request_success:
             item_price_list.append(response_value)
@@ -194,7 +195,7 @@ if len(fail_list) > 0:
             time.sleep(1)
         else:
             functions.append_failed_items(item_name, response_value, request_count)
-            sec_attempt_fails.append(item_name)
+            failed_twice_list.append(item_name)
 
         request_count -= 1
         timeout_count += 1
@@ -210,6 +211,7 @@ with open('est_time.csv', 'a', newline='') as file:
     for time in act_request_time:
         writer.writerow({'act_request_time': time})
 
+# end results
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
@@ -251,9 +253,10 @@ with open('complete_results.csv', 'w') as csvfile:
     for row in current_results:
         writer.writerow(row)
 
-if len(sec_attempt_fails) > 0:
+# prints items which failed twice to get price for
+if len(failed_twice_list) > 0:
     print("Failed twice to get price for: ")
-    for item in sec_attempt_fails:
+    for item in failed_twice_list:
         print(item)
 
 # deletes cache files
