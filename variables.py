@@ -1,5 +1,4 @@
-# dict with http codes
-# source: https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+# dictionary with http codes
 
 http_status_codes = {
     100: "Continue",
@@ -71,19 +70,30 @@ http_status_codes = {
     599: "Network Connection Timeout Error"
 }
 
-http_status_description = {
-    100: "The server has received the request headers and the client should proceed to send the request body.",
-    101: "The requester has asked the server to switch protocols and the server has agreed to do so.",
-    102: "A WebDAV request may contain many sub-requests involving file operations, requiring a long time to complete the request.",
-    103: "Used to return some response headers before final HTTP message.",
-
-    200: "Standard response for successful HTTP requests. The actual response will depend on the request method used.",
-    201: "The request has been fulfilled, resulting in the creation of a new resource.",
-    202: "The request has been accepted for processing, but the processing has not been completed. The request might or might not be eventually acted upon, and may be disallowed when processing occurs.",
-    203: "The server is a transforming proxy (e.g. a Web accelerator) that received a 200 OK from its origin, but is returning a modified version of the origin's response.",
-    204: "The server successfully processed the request, and is not returning any content.",
-    205: "The server successfully processed the request, asks that the requester reset its document view, and is not returning any content.",
-    206: "The server is delivering only part of the resource (byte serving) due to a range header sent by the client.",
-    
-
+# csv file name with actual steam market name for case price request
+market_case_name = {
+    "bravo_case.csv": "Operation Bravo Case",
+    "breakout_case.csv": "Operation Breakout Case",
+    "chroma_case": "Chroma Case",
+    "chroma_2_case.csv": "Chroma 2 Case",
+    "chroma_3_case.csv": "Chroma 3 Case",
+    "cs20_case.csv": "CS20 Case",
+    "esports_2013_case.csv": "eSports 2013 Case",
+    "esports_2013_winter_case.csv": "eSports 2013 Winter Case",
+    "esports_2014_summer_case.csv": "eSports 2014 Summer Case",
+    "falchion_case.csv": "Falchion Case",
+    "gamma_case.csv": "Gamma Case",
+    "gamma_2_case.csv": "Gamma 2 Case",
+    "huntsman_case.csv": "Huntsman Weapon Case",
+    "prisma_case.csv": "Prisma Case",
+    "prisma_2_case.csv": "Prisma 2 Case",
+    "phoenix_case.csv": "Operation Phoenix Weapon Case",
+    "revolver_case.csv": "Revolver Case",
+    "shadow_case.csv": "Shadow Case",
+    "spectrum_2_case.csv": "Spectrum 2 Case",
+    "vanguard_case.csv": "Operation Vanguard Weapon Case",
+    "weapon_case_2.csv": "CS:GO Weapon Case 2",
+    "weapon_case_3.csv": "CS:GO Weapon Case 3",
+    "weapon_case.csv": "CS:GO Weapon Case",
+    "winter_offensive_case.csv": "Winter Offensive Weapon Case"
 }

@@ -7,17 +7,11 @@ import time
 import locale
 import time
 import functions
+from variables import market_case_name
 
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
-
-def add_drop_for_quality(color):
-    """Adds drops into drop_amount_by_quality"""
-    if functions.is_stattrack():
-        drop_amount_by_quality["stat_" + color] += 1
-    else:
-        drop_amount_by_quality[color] += 1
 
 functions.file_check()
 
@@ -48,15 +42,15 @@ while True:
         print(f"File: {case_name} does not exist.")
 
 # get current case price
-formatted_case_name = functions.market_case_name[case_name]  # formatted case name
+formatted_case_name = market_case_name[case_name]  # actual case name on market
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
 
-if get_case_price.status_code == 200:  # 200 = request_success request
+try:
     steam_response = get_case_price.json()
     case_price = float(steam_response["lowest_price"][1:])  # removes $
-else:
+except ValueError:
     # case_price needs a value, program can't be executed.
     print(f"Failed to get price for {formatted_case_name}! \n"
           "Please wait 1-2 minutes or choose a different case.\n"
@@ -90,19 +84,24 @@ while opened < to_open:
     quality = random.uniform(0, 1)
     if 1 > quality >= 0.2007673:
         color = "blue"
-        add_drop_for_quality(color)
+        drop = functions.add_drop_for_quality(color)
+        drop_amount_by_quality[drop] += 1
     elif 0.2007673 > quality >= 0.0409208:
         color = "purple"
-        add_drop_for_quality(color)
+        drop = functions.add_drop_for_quality(color)
+        drop_amount_by_quality[drop] += 1
     elif 0.0409208 > quality >= 0.0089515:
         color = "pink"
-        add_drop_for_quality(color)
+        drop = functions.add_drop_for_quality(color)
+        drop_amount_by_quality[drop] += 1
     elif 0.0089515 > quality >= 0.0025576:
         color = "red"
-        add_drop_for_quality(color)
+        drop = functions.add_drop_for_quality(color)
+        drop_amount_by_quality[drop] += 1
     else:
         color = "yellow"
-        add_drop_for_quality(color)
+        drop = functions.add_drop_for_quality(color)
+        drop_amount_by_quality[drop] += 1
     opened += 1
 
 
@@ -158,15 +157,12 @@ else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
 print()
 
-total_time = time.time()
+timeout_count = 0
 end_request_count = request_count
-
-# remove fail list later, only for testing
 fail_list = []
 item_price_list = []
 act_request_time = []
 
-timeout_count = 0
 
 for item_name, amount in item_drop_dict.items():
     if timeout_count == 20 and request_count != 0:
@@ -174,8 +170,6 @@ for item_name, amount in item_drop_dict.items():
         timeout_count = 0
 
     start_time = time.time()
-    # request_success = returned bool of function (True, if request successfull)
-    # response_value = either price of item * dropped amount or if request_success False http response code.
     request_success, response_value = functions.steam_request(item_name, amount)
     if request_success:
         item_price_list.append(response_value)

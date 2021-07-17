@@ -4,42 +4,18 @@ import os
 import requests
 import locale
 import time
-from http_codes import http_status_codes
-
-# dict with real case name for steam market case price request
-market_case_name = {
-    "bravo_case.csv": "Operation Bravo Case",
-    "breakout_case.csv": "Operation Breakout Case",
-    "chroma_case": "Chroma Case",
-    "chroma_2_case.csv": "Chroma 2 Case",
-    "chroma_3_case.csv": "Chroma 3 Case",
-    "cs20_case.csv": "CS20 Case",
-    "esports_2013_case.csv": "eSports 2013 Case",
-    "esports_2013_winter_case.csv": "eSports 2013 Winter Case",
-    "esports_2014_summer_case.csv": "eSports 2014 Summer Case",
-    "falchion_case.csv": "Falchion Case",
-    "gamma_case.csv": "Gamma Case",
-    "gamma_2_case.csv": "Gamma 2 Case",
-    "huntsman_case.csv": "Huntsman Weapon Case",
-    "prisma_case.csv": "Prisma Case",
-    "prisma_2_case.csv": "Prisma 2 Case",
-    "phoenix_case.csv": "Operation Phoenix Weapon Case",
-    "revolver_case.csv": "Revolver Case",
-    "shadow_case.csv": "Shadow Case",
-    "spectrum_2_case.csv": "Spectrum 2 Case",
-    "vanguard_case.csv": "Operation Vanguard Weapon Case",
-    "weapon_case_2.csv": "CS:GO Weapon Case 2",
-    "weapon_case_3.csv": "CS:GO Weapon Case 3",
-    "weapon_case.csv": "CS:GO Weapon Case",
-    "winter_offensive_case.csv": "Winter Offensive Weapon Case"
-}
+from variables import http_status_codes, market_case_name
 
 
 def is_stattrack() -> bool:
     """Calculates random float from 0 - 1.
 
+    Args:
+        None
+
     Returns:
         True, if num <= 0.1, which results in a stat track skin.
+
         False, if num > 0.1, regular skin.
     """
     stattrack_chance = 0.1
@@ -47,6 +23,23 @@ def is_stattrack() -> bool:
     if random_num <= stattrack_chance:
         return True
     return False
+
+
+def add_drop_for_quality(color: str) -> str:
+    """Returns the color of skin depending on if is_stattrack().
+
+    Args:
+        color: The color of the skin e.g. 'blue'
+
+    Returns:
+        If is_stattrack() it returns 'stat_' + arg(color).
+
+        If not is_stattrack() it returns the unmodified passed argument.
+    """
+    if is_stattrack():
+        return "stat_" + color
+    else:
+        return color
 
 
 def drop_check(case_name: str, item: str) -> bool:
@@ -58,6 +51,7 @@ def drop_check(case_name: str, item: str) -> bool:
 
     Returns:
         True, if skin + wear exists.
+
         False, if skin + wear doesn't exist.
     """
     # removes wear from item name
@@ -110,6 +104,7 @@ def vanilla_check(skin_name: str):
         skin_name: name of skin to check, with wear.
     Returns:
         Tuple of True, skin name without wear if skin is vanilla.
+
         False if the skin is not a vanilla, original skin name.
     """
     with open("Cases/vanilla_knife.csv", 'r', encoding='utf-8') as csvfile:
@@ -203,6 +198,7 @@ def calculate_avg_request_time():
 
     Returns:
         (True, average): if calculation succeded and returns calculated average.
+
         False, if calcuation failed.
     """
     try:
@@ -221,7 +217,7 @@ def calculate_avg_request_time():
 
 # add if csv file exists, else create them
 
-def file_check():
+def file_check() -> None:
     """Checks if neccessary files exist. If not they are created with standard values."""
     if not os.path.isfile('est_time.csv'):
         with open('est_time.csv', 'w', newline='') as file:
@@ -304,7 +300,9 @@ def steam_request(item_name, amount):
 
     Returns:
         A Tuple, consisting of (bool, value)
+
         True, price * amount
+
         False, http response code.
     """
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
