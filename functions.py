@@ -34,7 +34,7 @@ def add_drop_for_quality(color: str) -> str:
     Returns:
         If is_stattrack() it returns 'stat_' + arg(color).
 
-        If not is_stattrack() it returns the unmodified passed argument.
+        If not is_stattrack() it returns the unmodified passed parameter.
     """
     if is_stattrack():
         return "stat_" + color
@@ -43,10 +43,10 @@ def add_drop_for_quality(color: str) -> str:
 
 
 def drop_check(case_name: str, item: str) -> bool:
-    """Checks if item exists. Because not every item has all wears.
+    """Checks if item exists. Not every item has all wears.
 
     Args:
-        case_name: name of case which is opened. This one will be checked.
+        case_name: name of opened case, this csv is checked.
         item: item name with wear to be checked, whether it exists in csv.
 
     Returns:
@@ -120,9 +120,10 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
     """Calculates a random wear for the dropped item qualities.
 
     Args:
-        case_name: name of case which is opened by user.
-        quality: Quality of skin (e.g. "blue", "yellow").
-        amount: Amount of drops for the current quality (e.g. "blue": 50).
+        case_name: name of case which is opened by user
+        quality: Quality of skin (e.g. "blue", "yellow")
+
+        amount: Amount of drops for the current quality (e.g. "blue": 50)
 
     Returns:
         Dictionary with all skin names + wear with amount of drops for each.
@@ -197,7 +198,7 @@ def calculate_avg_request_time():
     """Calculates average of all response times for the user.
 
     Returns:
-        (True, average): if calculation succeded and returns calculated average.
+        (True, average): if calculation succeded.
 
         False, if calcuation failed.
     """
@@ -218,7 +219,9 @@ def calculate_avg_request_time():
 # add if csv file exists, else create them
 
 def file_check() -> None:
-    """Checks if neccessary files exist. If not they are created with standard values."""
+    """Checks if neccessary files exist. If not they are created with standard values.
+       Some files are created without condition check.
+    """
     if not os.path.isfile('est_time.csv'):
         with open('est_time.csv', 'w', newline='') as file:
             fieldnames = ['act_request_time']
