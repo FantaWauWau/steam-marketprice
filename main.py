@@ -36,7 +36,6 @@ drop_amount_by_quality = {
     "stat_yellow": 0
     }
 
-
 # case to open
 while True:
     case_name = input("Enter Case name to open: ").casefold()
@@ -54,7 +53,7 @@ get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
 
-if get_case_price.status_code == 200:  # 200 = successful request
+if get_case_price.status_code == 200:  # 200 = request_success request
     steam_response = get_case_price.json()
     case_price = float(steam_response["lowest_price"][1:])  # removes $
 else:
@@ -175,10 +174,10 @@ for item_name, amount in item_drop_dict.items():
         timeout_count = 0
 
     start_time = time.time()
-    # boolean = returned bool of function
-    # response_value = either price of item * dropped amount or if boolean False http response code.
-    boolean, response_value = functions.steam_request(item_name, amount)
-    if boolean:
+    # request_success = returned bool of function (True, if request successfull)
+    # response_value = either price of item * dropped amount or if request_success False http response code.
+    request_success, response_value = functions.steam_request(item_name, amount)
+    if request_success:
         item_price_list.append(response_value)
     else:
         functions.append_failed_items(item_name, response_value, request_count)
@@ -186,49 +185,43 @@ for item_name, amount in item_drop_dict.items():
 
     request_count -= 1
     timeout_count += 1
-    print(f"{request_count} requests left ({round(100 - (request_count / end_request_count * 100), 2)}% completed)")
+    percentage_remaining = round(100 - (request_count / end_request_count * 100), 2)
+    print(f"{request_count} requests left ({percentage_remaining}% completed)")
     time.sleep(0.3)
     act_request_time.append((time.time() - start_time))
 
 
-# deletes cache files
-# useful for debugging
-#if os.path.exists('cache.csv'):
-    #os.remove('cache.csv')
-
-end_fail_list = []
+sec_attempt_fails = []
 request_count = len(fail_list)
 if len(fail_list) > 0:
     print(f"Failed to get item prices for {request_count} items.")
     print("Starting second attempt...")
     time.sleep(3)
-
     functions.timeout()
 
-    # reused for loop. todo: write function for requests
     for item_name, amount in fail_list:
         if timeout_count == 20 and request_count != 0:
             functions.timeout()
             timeout_count = 0
 
         start_time = time.time()
-        # boolean = returned bool of function
-        # response_value = either price of item * dropped amount or if boolean False http response code.
-        boolean, response_value = functions.steam_request(item_name, amount)
-        if boolean:
+        # request_success = returned bool of function
+        # response_value = either price of item * dropped amount or if False http response code.
+        request_success, response_value = functions.steam_request(item_name, amount)
+        if request_success:
             item_price_list.append(response_value)
             print(f"Got price for {item_name} on second attempt!")
             time.sleep(1)
         else:
             functions.append_failed_items(item_name, response_value, request_count)
-            end_fail_list.append(item_name)
+            sec_attempt_fails.append(item_name)
 
         request_count -= 1
         timeout_count += 1
-        print(f"{request_count} requests left ({round(100 - (request_count / end_request_count * 100), 2)}% completed)")
+        percentage_remaining = round(100 - (request_count / end_request_count * 100), 2)
+        print(f"{request_count} requests left ({percentage_remaining}% completed)")
         time.sleep(0.3)
         act_request_time.append((time.time() - start_time))
-
 
 # writes requests times for current run in csv
 with open('est_time.csv', 'a', newline='') as file:
@@ -237,18 +230,17 @@ with open('est_time.csv', 'a', newline='') as file:
     for time in act_request_time:
         writer.writerow({'act_request_time': time})
 
-
 rounded_cash = round(cash, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
 os.system('cls' if os.name == 'nt' else 'clear')
-
-
+print("End Results:")
+print()
 print(f"You opened {to_open} cases for a total of {end_request_count} unique skins.")
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
-print(round(sum(act_request_time), 2))
+print(f"Actual time: {round(sum(act_request_time), 2)}")
 
 current_results = []
 results = []
@@ -261,18 +253,17 @@ with open('complete_results.csv', 'r') as csvfile:
         else:
             results.append(row)
 
+# add current result for opened case to stored result of case x
 total_opened = int(results[0]["total_opened"]) + to_open
 total_spent = float(results[0]["total_spent"]) + rounded_cash
 return_on_invest = float(results[0]["return_on_invest"]) + rounded_result
-
-
 current_results.append({'case_name': case_name,
                         'total_opened': total_opened,
                         'total_spent': round(total_spent, 2),
                         'return_on_invest': round(return_on_invest, 2)
                     })
-
 current_results.reverse()
+
 with open('complete_results.csv', 'w') as csvfile:
     fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -280,7 +271,12 @@ with open('complete_results.csv', 'w') as csvfile:
     for row in current_results:
         writer.writerow(row)
 
-if len(end_fail_list) > 0:
+if len(sec_attempt_fails) > 0:
     print("Failed twice to get price for: ")
-    for item in end_fail_list:
+    for item in sec_attempt_fails:
         print(item)
+
+# deletes cache files
+# useful for debugging
+#if os.path.exists('cache.csv'):
+    #os.remove('cache.csv')

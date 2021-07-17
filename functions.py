@@ -6,7 +6,7 @@ import locale
 import time
 from http_codes import http_status_codes
 
-# dictionary for formatting case name for price request to steam
+# dict with real case name for steam market case price request
 market_case_name = {
     "bravo_case.csv": "Operation Bravo Case",
     "breakout_case.csv": "Operation Breakout Case",
@@ -36,7 +36,12 @@ market_case_name = {
 
 
 def is_stattrack() -> bool:
-    """Returns True if random number <= 0.1 == stat strack skin."""
+    """Calculates random float from 0 - 1.
+
+    Returns:
+        True, if num <= 0.1, which results in a stat track skin.
+        False, if num > 0.1, regular skin.
+    """
     stattrack_chance = 0.1
     random_num = random.uniform(0, 1)
     if random_num <= stattrack_chance:
@@ -194,7 +199,12 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
 
 
 def calculate_avg_request_time():
-    """Calculates average of all response times of user"""
+    """Calculates average of all response times for the user.
+
+    Returns:
+        (True, average): if calculation succeded and returns calculated average.
+        False, if calcuation failed.
+    """
     try:
         total_values = -1  # -1 for header in csv
         sum_of_time = 0
@@ -212,6 +222,7 @@ def calculate_avg_request_time():
 # add if csv file exists, else create them
 
 def file_check():
+    """Checks if neccessary files exist. If not they are created with standard values."""
     if not os.path.isfile('est_time.csv'):
         with open('est_time.csv', 'w', newline='') as file:
             fieldnames = ['act_request_time']
@@ -259,13 +270,19 @@ def file_check():
                     })
 
 
-def append_failed_items(skin_name, response_code, request_count):
+def append_failed_items(skin_name: str, response_code: int, request_count: int):
+    """Writes failed items with additional info into a file for debugging.
+
+    Args:
+        skin_name: name of skin.
+        response_code: The http code returned by steam on failed request.
+        request_count: The position in loop when it received an invalid response.
+    """
     to_write = {}
     with open('failed_items.csv', 'r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if skin_name in row['skin_name'] and str(response_code) in row['response_code']:
-                print("NONE")
                 return None
         to_write["skin_name"] = skin_name
         to_write["response_code"] = response_code
@@ -282,7 +299,8 @@ def append_failed_items(skin_name, response_code, request_count):
 
 
 def steam_request(item_name, amount):
-    """Sents request to steam for item price.
+    """Sends request to steam market to get price for an 'item_name'.
+       If steam returns a price its multiplied by the dropped 'amount'.
 
     Returns:
         (Tuple)
@@ -311,7 +329,9 @@ def steam_request(item_name, amount):
 
 
 def timeout():
-    """Timeout for 60seconds. Used for pausing steam requests."""
+    """Timeout for 60 seconds. Too many requests in a row result, in a temporary
+       ban for sending requests.
+    """
     for i in range(60):
         os.system('cls' if os.name == 'nt' else 'clear')
         print(f"{i - 60} seconds left until next request.")
