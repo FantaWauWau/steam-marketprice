@@ -7,7 +7,7 @@ import time
 import locale
 import time
 import functions
-from variables import market_case_name, drop_amount_by_quality
+from variables import market_case_name, drop_amount_by_quality, case_name_into_csv
 
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -19,6 +19,10 @@ functions.file_check()
 # case to open
 while True:
     case_name = input("Enter Case name to open: ").casefold()
+    if case_name in case_name_into_csv:
+        case_name = case_name_into_csv[case_name]
+        break
+
     if case_name[-4:] != ".csv":
         case_name = case_name + ".csv"
 
@@ -29,6 +33,7 @@ while True:
 
 # get current case price
 formatted_case_name = market_case_name[case_name]  # actual case name on market
+print(formatted_case_name)
 get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                               "appid=730&currency=1&market_hash_name="
                               + formatted_case_name)
@@ -258,8 +263,3 @@ if len(failed_twice_list) > 0:
     print("Failed twice to get price for: ")
     for item in failed_twice_list:
         print(item)
-
-# deletes cache files
-# useful for debugging
-#if os.path.exists('cache.csv'):
-    #os.remove('cache.csv')
