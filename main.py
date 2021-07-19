@@ -5,20 +5,31 @@ import math
 import requests
 import time
 import locale
-import time
 import functions
-from variables import market_case_name, drop_amount_by_quality, case_name_into_csv
-
+import variables
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-
 functions.file_check()
+
+drop_amount_by_quality = {
+    "blue": 0,
+    "purple": 0,
+    "pink": 0,
+    "red": 0,
+    "yellow": 0,
+
+    "stat_blue": 0,
+    "stat_purple": 0,
+    "stat_pink": 0,
+    "stat_red": 0,
+    "stat_yellow": 0
+    }
 
 # case to open
 while True:
     case_name = input("Enter Case name to open: ").casefold()
-    if case_name in case_name_into_csv:
-        case_name = case_name_into_csv[case_name]
+    if case_name in variables.case_name_into_csv:
+        case_name = variables.case_name_into_csv[case_name]
         break
 
     if case_name[-4:] != ".csv":
@@ -30,13 +41,13 @@ while True:
         print(f"File: {case_name} does not exist.")
 
 # get current case price
-formatted_case_name = market_case_name[case_name]  # actual case name on market
-get_case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                              "appid=730&currency=1&market_hash_name="
-                              + formatted_case_name)
+formatted_case_name = variables.market_case_name[case_name]  # market name
+case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
+                          "appid=730&currency=1&market_hash_name="
+                          + formatted_case_name)
 
 try:
-    steam_response = get_case_price.json()
+    steam_response = case_price.json()
     case_price = float(steam_response["lowest_price"][1:])  # removes $
 except ValueError:
     # case_price needs a value, program can't be executed.
@@ -80,27 +91,18 @@ opened = 0
 while opened < to_open:
     quality = random.uniform(0, 1)
     if 1 > quality >= 0.2007673:
-        color = "blue"
-        drop = functions.add_drop_for_quality(color)
-        drop_amount_by_quality[drop] += 1
+        drop_amount_by_quality[functions.add_drop_for_quality("blue")] += 1
     elif 0.2007673 > quality >= 0.0409208:
-        color = "purple"
-        drop = functions.add_drop_for_quality(color)
-        drop_amount_by_quality[drop] += 1
+        drop_amount_by_quality[functions.add_drop_for_quality("purple")] += 1
     elif 0.0409208 > quality >= 0.0089515:
-        color = "pink"
-        drop = functions.add_drop_for_quality(color)
-        drop_amount_by_quality[drop] += 1
+        drop_amount_by_quality[functions.add_drop_for_quality("pink")] += 1
     elif 0.0089515 > quality >= 0.0025576:
-        color = "red"
-        drop = functions.add_drop_for_quality(color)
-        drop_amount_by_quality[drop] += 1
+        drop_amount_by_quality[functions.add_drop_for_quality("red")] += 1
     else:
-        color = "yellow"
-        drop = functions.add_drop_for_quality(color)
+        drop = functions.add_drop_for_quality("yellow")
         # gloves
         if is_glove_case and "stat_" in drop:
-            drop = drop[5:] # removes stat_
+            drop = drop[5:]  # removes stat_
         drop_amount_by_quality[drop] += 1
     opened += 1
 
@@ -108,11 +110,11 @@ while opened < to_open:
 # loops through the dict with drop amount for qualities and calculates wear.
 for quality, amount in drop_amount_by_quality.items():
     if amount != 0:
-        skin_name_with_wear_dict = functions.calculate_wear(case_name, quality, amount)
+        skin_wear_dict = functions.calculate_wear(case_name, quality, amount)
         with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['skin_name', 'amount_of_drops']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            for skin_name, amount in skin_name_with_wear_dict.items():
+            for skin_name, amount in skin_wear_dict.items():
                 writer.writerow({'skin_name': skin_name, 'amount_of_drops': amount})
 
 # add items into new list, for multiple drops
@@ -128,25 +130,19 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             if is_vanilla:
                 try:
                     item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
-                except:
+                except ValueError:
                     item_drop_dict[vanilla_name] = int(row["amount_of_drops"])
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
-# calculate avg. request time for local user values, if fails standard value is used.
-try:
-    average_request = functions.calculate_avg_request_time()[1]
-except:
-    print("Something went wrong in calculating average request time.")
-    print("Falling back to standard value of 0.7")
-    average_request = 0.7
+avg_req_time = functions.calculate_avg_request_time()
 
 # calculates how often the program will timeout, when requesting
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
-    estimated_time = request_count * average_request
+    estimated_time = request_count * avg_req_time
 else:
-    estimated_time = (amount_of_timeouts * 60) + (request_count * average_request)
+    estimated_time = (amount_of_timeouts * 60) + (request_count * avg_req_time)
 
 print(f"Requesting prices for {request_count} unique skins.")
 # calculates estimated time to sent all requests and process them
@@ -222,8 +218,8 @@ if len(fail_list) > 0:
 with open('est_time.csv', 'a', newline='') as file:
     fieldnames = ['act_request_time']
     writer = csv.DictWriter(file, fieldnames=fieldnames)
-    for time in act_request_time:
-        writer.writerow({'act_request_time': time})
+    for request_time in act_request_time:
+        writer.writerow({'act_request_time': request_time})
 
 # end results
 rounded_cash = round(cash, 2)
@@ -232,7 +228,7 @@ rounded_result = round(sum(item_price_list) - rounded_cash, 2)
 os.system('cls' if os.name == 'nt' else 'clear')
 print("End Results:")
 print()
-print(f"You opened {to_open} cases for a total of {end_request_count} unique skins.")
+print(f"You opened {to_open} cases for a total of {end_request_count} skins.")
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
@@ -257,7 +253,7 @@ current_results.append({'case_name': case_name,
                         'total_opened': total_opened,
                         'total_spent': round(total_spent, 2),
                         'return_on_invest': round(return_on_invest, 2)
-                    })
+                        })
 current_results.reverse()
 
 with open('complete_results.csv', 'w') as csvfile:

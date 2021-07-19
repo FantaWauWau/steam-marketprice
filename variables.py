@@ -1,19 +1,5 @@
-# this file contains long dictionaries, which are imported into main & functions
+# this file contains lists & dicts which are imported into other files
 
-# stores the amount of drops for each item quality
-drop_amount_by_quality = {
-    "blue": 0,
-    "purple": 0,
-    "pink": 0,
-    "red": 0,
-    "yellow": 0,
-
-    "stat_blue": 0,
-    "stat_purple": 0,
-    "stat_pink": 0,
-    "stat_red": 0,
-    "stat_yellow": 0
-    }
 
 # dictionary with http codes
 http_status_codes = {

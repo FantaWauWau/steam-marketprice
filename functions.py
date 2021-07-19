@@ -5,6 +5,7 @@ import requests
 import locale
 import time
 from variables import http_status_codes, market_case_name
+from typing import Union
 
 
 def is_stattrack() -> bool:
@@ -90,14 +91,14 @@ def drop_check(case_name: str, item: str) -> bool:
         full_item_name = item_without_wear + wear.lstrip()
         full_item_names.append(full_item_name)
 
-    # function paramater (item) is checked if it exists in list 
+    # function paramater (item) is checked if it exists in list
     # with all available item + wears.
     if item in full_item_names:
         return True
     return False
 
 
-def vanilla_check(skin_name: str):
+def vanilla_check(skin_name: str) -> Union[bool, str]:
     """Checks if skins is a vanilla knife.
 
     Args:
@@ -116,7 +117,7 @@ def vanilla_check(skin_name: str):
         return False, skin_name  # returns unformatted skin name
 
 
-def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
+def calculate_wear(case_name: str, quality: str, amount: int) -> dict:
     """Calculates a random wear for the dropped item qualities.
 
     Args:
@@ -136,7 +137,8 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
             item_list.append(row)
 
     # removes every dict from item_list which doesn't match the passed quality
-    items_by_quality = [item for item in item_list if item['quality'] == quality]
+    items_by_quality = [item for item in item_list
+                        if item['quality'] == quality]
 
     # creates a list with all skin names of quality x (e.g. "blue")
     all_skin_names_by_quality = []
@@ -194,13 +196,13 @@ def calculate_wear(case_name: str, quality: str, amount: int) -> vars:
     return skin_name_with_wear
 
 
-def calculate_avg_request_time():
+def calculate_avg_request_time() -> float:
     """Calculates average of all response times for the user.
 
     Returns:
-        (True, average): if calculation succeded.
+        average: average of locally saved request times of user.
 
-        False, if calcuation failed.
+        0.7: 0.7 is used as default average time of calculation fails.
     """
     try:
         total_values = -1  # -1 for header in csv
@@ -212,15 +214,17 @@ def calculate_avg_request_time():
                 sum_of_time += float(row['act_request_time'])
 
         average = sum_of_time / total_values
-        return True, average
-    except:
-        return False
+        return average
+    except ZeroDivisionError:
+        print("Something went wrong in calculating average request time.")
+        print("Falling back to standard value of 0.7")
+        return 0.7
 
-# add if csv file exists, else create them
 
 def file_check() -> None:
-    """Checks if neccessary files exist. If not they are created with standard values.
-       Some files are created without condition check.
+    """Checks if neccessary files exist. If not they are created.
+       Some files are created without condition, as they need to be empty
+       on execution.
     """
     if not os.path.isfile('est_time.csv'):
         with open('est_time.csv', 'w', newline='') as file:
@@ -269,35 +273,35 @@ def file_check() -> None:
                     })
 
 
-def append_failed_items(skin_name: str, response_code: int, request_count: int):
+def append_failed_items(name: str, response: int, request_count: int) -> None:
     """Writes failed items with additional info into a file for debugging.
 
     Args:
-        skin_name: name of skin.
-        response_code: The http code returned by steam on failed request.
-        request_count: The position in loop when it received an invalid response.
+        name: name of skin.
+        response: The http code returned by steam on failed request.
+        request_count: Position in loop when it received an invalid response.
     """
     to_write = {}
     with open('failed_items.csv', 'r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
-            if skin_name in row['skin_name'] and str(response_code) in row['response_code']:
+            if name in row['skin'] and str(response) in row['response']:
                 return None
-        to_write["skin_name"] = skin_name
-        to_write["response_code"] = response_code
+        to_write["skin"] = name
+        to_write["response"] = response
         to_write["request_count"] = request_count
 
     with open('failed_items.csv', 'a', newline='', encoding='utf-8') as file:
-        fieldnames = ['skin_name', 'request_count', 'response_code', 'http_status_code']
+        fieldnames = ['skin', 'request_count', 'response', 'http_status_code']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writerow({'skin_name': to_write['skin_name'],
+        writer.writerow({'skin': to_write['name'],
                          'request_count': to_write['request_count'],
-                         'response_code': to_write['response_code'],
-                         'http_status_code': http_status_codes[response_code]
-                    })
+                         'response': to_write['response'],
+                         'http_status_code': http_status_codes[response]
+                         })
 
 
-def steam_request(item_name, amount):
+def steam_request(name: str, amount: int) -> Union[bool, float]:
     """Sends request to steam market to get price for an 'item_name'.
        If steam returns a price its multiplied by the dropped 'amount'.
 
@@ -309,11 +313,11 @@ def steam_request(item_name, amount):
         False, http response code.
     """
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
-                            "appid=730&currency=1&market_hash_name=" + item_name)
+                            "appid=730&currency=1&market_hash_name=" + name)
 
     try:
         steam_response = response.json()
-    except:
+    except ValueError:
         return False, response.status_code
 
     try:
@@ -325,13 +329,13 @@ def steam_request(item_name, amount):
             return True, float(locale.atof(formatted_price) * float(amount))
         else:
             return True, float(formatted_price) * float(amount)
-    except:
+    except ValueError:
         return False, response.status_code
 
 
-def timeout():
-    """Timeout for 60 seconds. Too many requests in a row result, in a temporary
-       ban for sending requests.
+def timeout() -> None:
+    """Stops program execution for 60s. Too many request to steam without
+       timeouts will result in temporary ban from sending new requests.
     """
     for i in range(60):
         os.system('cls' if os.name == 'nt' else 'clear')
