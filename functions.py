@@ -8,6 +8,11 @@ from variables import http_status_codes, market_case_name
 from typing import Union
 
 
+def clear_terminal():
+    """Clears terminal window"""
+    return os.system('cls' if os.name == 'nt' else 'clear')
+
+
 def is_stattrack() -> bool:
     """Calculates random float from 0 - 1.
 
@@ -118,8 +123,9 @@ def vanilla_check(skin_name: str) -> Union[bool, str]:
         return False, skin_name  # returns unformatted skin name
 
 
-def calculate_wear(case_name: str, quality: str, amount: int) -> dict:
-    """Calculates a random wear for the dropped item qualities.
+def calculate_drops(case_name: str, quality: str, amount: int) -> dict:
+    """Picks a random skin from items of 'quality' of 'case_name' and
+    calculates a random wear for it.
 
     Args:
         case_name: name of case which is opened by user
@@ -212,13 +218,15 @@ def calculate_avg_request_time() -> float:
             reader = csv.DictReader(file)
             for row in reader:
                 total_values += 1
-                sum_of_time += float(row['act_request_time'])
-
+                sum_of_time += float(row['request time'])
         average = sum_of_time / total_values
         return average
+
     except ZeroDivisionError:
-        print("Something went wrong in calculating average request time.")
-        print("Falling back to standard value of 0.7")
+        print("Using 0.7s as default request time for first run.\n"
+              "With more runs, estimated time will be more accurate.")
+        time.sleep(4)
+        clear_terminal()
         return 0.7
 
 
@@ -229,49 +237,38 @@ def file_check() -> None:
     """
     if not os.path.isfile('est_time.csv'):
         with open('est_time.csv', 'w', newline='') as file:
-            fieldnames = ['act_request_time']
+            fieldnames = ['request time']
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
 
     if not os.path.isfile('complete_results.csv'):
         with open('complete_results.csv', 'w', newline='') as file:
-            fieldnames = [
-                    "case_name",
-                    "total_opened",
-                    "total_spent",
-                    "return_on_invest"
-                    ]
+            fieldnames = ["case", "total opened", "total spent",
+                          "return on invest"]
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             for item in market_case_name:
-                writer.writerow({
-                            'case_name': item,
-                            'total_opened': 0,
-                            'total_spent': 0,
-                            'return_on_invest': 0
-                            })
+                writer.writerow({'case': item,
+                                 'total opened': 0,
+                                 'total spent': 0,
+                                 'return on invest': 0
+                                 })
 
     # cache.csv & failed_items.csv are always created new on start.
     with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
-        fieldnames = ["skin_name", "amount_of_drops"]
+        fieldnames = ["skin", "amount"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
 
     with open('failed_items.csv', 'w', newline='') as file:
-        fieldnames = [
-                    'skin_name',
-                    'request_count',
-                    'response_code',
-                    'http_status_code'
-                    ]
+        fieldnames = ['skin', 'request_count', 'response', 'http_status_code']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerow({
-                    'skin_name': 0,
-                    'request_count': 0,
-                    'response_code': 0,
-                    'http_status_code': 0
-                    })
+        writer.writerow({'skin': 0,
+                         'request_count': 0,
+                         'response': 0,
+                         'http_status_code': 0
+                         })
 
 
 def append_failed_items(name: str, response: int, request_count: int) -> None:
@@ -282,22 +279,18 @@ def append_failed_items(name: str, response: int, request_count: int) -> None:
         response: The http code returned by steam on failed request.
         request_count: Position in loop when it received an invalid response.
     """
-    to_write = {}
     with open('failed_items.csv', 'r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
         for row in reader:
             if name in row['skin'] and str(response) in row['response']:
                 return None
-        to_write["skin"] = name
-        to_write["response"] = response
-        to_write["request_count"] = request_count
 
     with open('failed_items.csv', 'a', newline='', encoding='utf-8') as file:
         fieldnames = ['skin', 'request_count', 'response', 'http_status_code']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
-        writer.writerow({'skin': to_write['name'],
-                         'request_count': to_write['request_count'],
-                         'response': to_write['response'],
+        writer.writerow({'skin': name,
+                         'request_count': request_count,
+                         'response': response,
                          'http_status_code': http_status_codes[response]
                          })
 
@@ -317,20 +310,20 @@ def steam_request(name: str, amount: int) -> Union[bool, float]:
                             "appid=730&currency=1&market_hash_name=" + name)
 
     try:
-        steam_response = response.json()
-    except ValueError:
+        formatted_response = response.json()
+    except Exception:
         return False, response.status_code
 
     try:
-        if "lowest_price" in steam_response:
-            formatted_price = steam_response["lowest_price"][1:]  # remove $
-        elif "median_price" in steam_response:
-            formatted_price = steam_response["median_price"][1:]
+        if "lowest_price" in formatted_response:
+            formatted_price = formatted_response["lowest_price"][1:]
+        elif "median_price" in formatted_response:
+            formatted_price = formatted_response["median_price"][1:]
         if "," in formatted_price:
-            return True, float(locale.atof(formatted_price) * float(amount))
+            return True, float(locale.atof(formatted_price) * amount)
         else:
-            return True, float(formatted_price) * float(amount)
-    except ValueError:
+            return True, float(formatted_price) * amount
+    except Exception:
         return False, response.status_code
 
 
@@ -339,8 +332,14 @@ def timeout() -> None:
        timeouts will result in temporary ban from sending new requests.
     """
     for i in range(60):
-        os.system('cls' if os.name == 'nt' else 'clear')
+        clear_terminal()
         print(f"{i - 60} seconds left until next request.")
         time.sleep(1)
-        os.system('cls' if os.name == 'nt' else 'clear')
+        clear_terminal()
         print("New requests are being sent...")
+
+
+def print_request_status(request_count: int, total_case_amount: int) -> None:
+    """Prints current status of completed requests as int and in % completed"""
+    percentage = round(100 - (request_count / total_case_amount * 100), 2)
+    print(f"{request_count} requests left ({percentage}% completed)")

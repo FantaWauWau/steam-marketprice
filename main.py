@@ -5,10 +5,13 @@ import math
 import requests
 import time
 import locale
-import functions as func
+
 import variables
+import functions as func
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+
+func.clear_terminal()
 func.file_check()
 
 drop_amount_by_quality = {
@@ -31,10 +34,8 @@ while True:
     if case_name in variables.case_name_into_csv:
         case_name = variables.case_name_into_csv[case_name]
         break
-
     if case_name[-4:] != ".csv":
         case_name = case_name + ".csv"
-
     if os.path.isfile(f"Cases/{case_name}"):
         break
     else:
@@ -49,7 +50,7 @@ case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
 try:
     steam_response = case_price.json()
     case_price = float(steam_response["lowest_price"][1:])  # removes $
-except ValueError:
+except TypeError:
     # case_price needs a value, program can't be executed.
     print(f"Failed to get price for {formatted_case_name}! \n"
           "Please wait 1-2 minutes or choose a different case.\n"
@@ -65,12 +66,12 @@ while True:
             money_spent = float(cases_to_open.strip("$"))
             to_open = math.floor(money_spent / (2.59 + case_price))
             remaining_money = money_spent - (to_open * (2.59 + case_price))
-            cash = money_spent - remaining_money
+            money = money_spent - remaining_money
             print(f"{to_open} cases will be opened.")
-            print(f"Remaining cash: ${round(remaining_money, 2)}")
+            print(f"Remaining money: ${round(remaining_money, 2)}")
             break
         else:
-            cash = float(cases_to_open) * (2.59 + case_price)
+            money = float(cases_to_open) * (2.59 + case_price)
             to_open = int(cases_to_open)
             break
     except ValueError:
@@ -110,39 +111,38 @@ while opened < to_open:
 # loops through the dict with drop amount for qualities and calculates wear.
 for quality, amount in drop_amount_by_quality.items():
     if amount != 0:
-        skin_wear_dict = func.calculate_wear(case_name, quality, amount)
+        skin_wear_dict = func.calculate_drops(case_name, quality, amount)
         with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
-            fieldnames = ['skin_name', 'amount_of_drops']
+            fieldnames = ['skin', 'amount']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             for skin_name, amount in skin_wear_dict.items():
-                writer.writerow({'skin_name': skin_name, 'amount_of_drops': amount})
+                writer.writerow({'skin': skin_name, 'amount': amount})
 
 # add items into new list, for multiple drops
 # if skins is a vanilla skin, the wear is removed in vanilla_check()
 item_drop_dict = {}
-request_count = 0
 with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        if int(row["amount_of_drops"]) >= 1:
-            request_count += 1
-            is_vanilla, vanilla_name = func.vanilla_check(row["skin_name"])
+        if int(row["amount"]) >= 1:
+            is_vanilla, vanilla_name = func.vanilla_check(row["skin"])
             if is_vanilla:
                 try:
-                    item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
+                    item_drop_dict[vanilla_name] += int(row["amount"])
                 except ValueError:
-                    item_drop_dict[vanilla_name] = int(row["amount_of_drops"])
+                    item_drop_dict[vanilla_name] = int(row["amount"])
             else:
-                item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
+                item_drop_dict[row["skin"]] = int(row["amount"])
 
-avg_req_time = func.calculate_avg_request_time()
+request_count = len(item_drop_dict)
+request_time = func.calculate_avg_request_time()
 
 # calculates how often the program will timeout, when requesting
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
-    estimated_time = request_count * avg_req_time
+    estimated_time = request_count * request_time
 else:
-    estimated_time = (amount_of_timeouts * 60) + (request_count * avg_req_time)
+    estimated_time = (amount_of_timeouts * 60) + (request_count * request_time)
 
 print(f"Requesting prices for {request_count} unique skins.")
 # calculates estimated time to sent all requests and process them
@@ -157,10 +157,10 @@ else:
 print()
 
 timeout_count = 0
-end_request_count = request_count
+total_case_amount = request_count
 fail_list = []
 item_price_list = []
-act_request_time = []
+request_times = []
 
 # loops through the dict of {item: amount} of drops and sents price request
 for item_name, amount in item_drop_dict.items():
@@ -178,10 +178,9 @@ for item_name, amount in item_drop_dict.items():
 
     request_count -= 1
     timeout_count += 1
-    percentage_remaining = round(100 - (request_count / end_request_count * 100), 2)
-    print(f"{request_count} requests left ({percentage_remaining}% completed)")
+    func.print_request_status(request_count, total_case_amount)
     time.sleep(0.3)
-    act_request_time.append((time.time() - start_time))
+    request_times.append((time.time() - start_time))
 
 
 failed_twice_list = []
@@ -209,30 +208,28 @@ if len(fail_list) > 0:
 
         request_count -= 1
         timeout_count += 1
-        percentage_remaining = round(100 - (request_count / end_request_count * 100), 2)
-        print(f"{request_count} requests left ({percentage_remaining}% completed)")
+        func.print_request_status(request_count, total_case_amount)
         time.sleep(0.3)
-        act_request_time.append((time.time() - start_time))
+        request_times.append((time.time() - start_time))
 
 # writes requests times for current run in csv
 with open('est_time.csv', 'a', newline='') as file:
-    fieldnames = ['act_request_time']
+    fieldnames = ['request time']
     writer = csv.DictWriter(file, fieldnames=fieldnames)
-    for request_time in act_request_time:
-        writer.writerow({'act_request_time': request_time})
+    for request_time in request_times:
+        writer.writerow({'request time': request_time})
 
 # end results
-rounded_cash = round(cash, 2)
+rounded_cash = round(money, 2)
 rounded_sum = round(sum(item_price_list), 2)
 rounded_result = round(sum(item_price_list) - rounded_cash, 2)
-os.system('cls' if os.name == 'nt' else 'clear')
+func.clear_terminal()
 print("End Results:")
-print()
-print(f"You opened {to_open} cases for a total of {end_request_count} skins.")
+print(f"You opened {to_open} cases for a total of {total_case_amount} skins.")
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
-print(f"Actual time: {round(sum(act_request_time), 2)}")
+print(f"Actual time: {round(sum(request_times), 2)}")
 
 current_results = []
 results = []
@@ -240,30 +237,30 @@ results = []
 with open('complete_results.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
-        if row["case_name"] != case_name:
+        if row["case"] != case_name:
             current_results.append(row)
         else:
             results.append(row)
 
 # add current result for opened case to stored result of case x
-total_opened = int(results[0]["total_opened"]) + to_open
-total_spent = float(results[0]["total_spent"]) + rounded_cash
-return_on_invest = float(results[0]["return_on_invest"]) + rounded_result
-current_results.append({'case_name': case_name,
-                        'total_opened': total_opened,
-                        'total_spent': round(total_spent, 2),
-                        'return_on_invest': round(return_on_invest, 2)
+total_opened = int(results[0]["total opened"]) + to_open
+total_spent = float(results[0]["total spent"]) + rounded_cash
+return_on_invest = float(results[0]["return on invest"]) + rounded_result
+current_results.append({'case': case_name,
+                        'total opened': total_opened,
+                        'total spent': round(total_spent, 2),
+                        'return on invest': round(return_on_invest, 2)
                         })
-current_results.reverse()
 
 with open('complete_results.csv', 'w') as csvfile:
-    fieldnames = ["case_name", "total_opened", "total_spent", "return_on_invest"]
+    fieldnames = ["case", "total opened", "total spent", "return on invest"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
+    current_results.reverse()
     for row in current_results:
         writer.writerow(row)
 
-# prints items which failed twice to get price for
+# prints items which failed twice to get price
 if len(failed_twice_list) > 0:
     print("Failed twice to get price for: ")
     for item in failed_twice_list:
