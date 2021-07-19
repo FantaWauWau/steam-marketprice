@@ -191,7 +191,7 @@ def calculate_avg_request_time() -> float:
     Returns:
         average: average of locally saved request times of user.
 
-        0.7: 0.7s is used as default request time if calculation fails,
+        0.7: 0.7s is used as default request time if calculation fails
         or has no values, because of first run.
     """
     try:
@@ -231,11 +231,8 @@ def file_check() -> None:
             writer = csv.DictWriter(file, fieldnames=fieldnames)
             writer.writeheader()
             for item in market_case_name:
-                writer.writerow({'case': item,
-                                 'total opened': 0,
-                                 'total spent': 0,
-                                 'return on invest': 0
-                                 })
+                writer.writerow({'case': item, 'total opened': 0,
+                                 'total spent': 0, 'return on invest': 0})
 
     # cache.csv & failed_items.csv are always created new on start.
     with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
@@ -247,11 +244,8 @@ def file_check() -> None:
         fieldnames = ['skin', 'request_count', 'response', 'http_status_code']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerow({'skin': 0,
-                         'request_count': 0,
-                         'response': 0,
-                         'http_status_code': 0
-                         })
+        writer.writerow({'skin': 0, 'request_count': 0, 'response': 0,
+                         'http_status_code': 0})
 
 
 def append_failed_items(name: str, response: int, request_count: int) -> None:

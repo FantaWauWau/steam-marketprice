@@ -51,14 +51,11 @@ try:
     steam_response = case_price.json()
     case_price = float(steam_response["lowest_price"][1:])  # removes $
 except TypeError:
-    # case_price needs a value, program can't be executed.
     print(f"Failed to get price for {formatted_case_name}! \n"
-          "Please wait 1-2 minutes or choose a different case.\n"
-          "Quitting...")
+          "Please wait 1-2 minutes or choose a different case.")
     quit()
 
 
-# asks for amount of cases or money amount to spend
 while True:
     cases_to_open = input("Enter amount of cases or $: ")
     try:
@@ -78,10 +75,10 @@ while True:
         print("Something went wrong! \n"
               "Please enter amount of cases to open or for example 50$.")
 
-# glove cases check, stattrack needs to be removed from drops
+
 glove_case_list = ["Glove Case", "Operation Hydra Case", "Clutch Case",
                    "Operation Broken Fang Case", "Snakebite Case"]
-
+# checks if current case is a case with gloves
 is_glove_case = False
 for case in glove_case_list:
     if case == case_name:
@@ -101,7 +98,6 @@ while opened < to_open:
         drops_by_quality[func.stattrack_check("red")] += 1
     else:
         drop = func.stattrack_check("yellow")
-        # gloves
         if is_glove_case and "stat_" in drop:
             drop = drop[5:]  # removes stat_
         drops_by_quality[drop] += 1
@@ -214,7 +210,7 @@ if len(fail_list) > 0:
         time.sleep(0.3)
         request_times.append((time.time() - start_time))
 
-# writes requests times for current run in csv
+# appends request times for current run into csv
 with open('est_time.csv', 'a', newline='') as file:
     fieldnames = ['request time']
     writer = csv.DictWriter(file, fieldnames=fieldnames)
@@ -235,7 +231,6 @@ print(f"Actual time: {round(sum(request_times), 2)}")
 
 current_results = []
 results = []
-
 with open('complete_results.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
@@ -244,7 +239,7 @@ with open('complete_results.csv', 'r') as csvfile:
         else:
             results.append(row)
 
-# add current result for opened case to stored result of case x
+# add current result to stored result of case x
 total_opened = int(results[0]["total opened"]) + to_open
 total_spent = float(results[0]["total spent"]) + rounded_cash
 return_on_invest = float(results[0]["return on invest"]) + rounded_result
