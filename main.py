@@ -14,7 +14,7 @@ locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 func.clear_terminal()
 func.file_check()
 
-drop_amount_by_quality = {
+drops_by_quality = {
     "blue": 0,
     "purple": 0,
     "pink": 0,
@@ -87,37 +87,38 @@ for case in glove_case_list:
     if case == case_name:
         is_glove_case = True
 
-# calculates amount of drops by quality for amount of cases to open
+# amount of drops by quality, including stattracks. For amount of cases to open
 opened = 0
 while opened < to_open:
     quality = random.uniform(0, 1)
     if 1 > quality >= 0.2007673:
-        drop_amount_by_quality[func.add_drop_for_quality("blue")] += 1
+        drops_by_quality[func.stattrack_check("blue")] += 1
     elif 0.2007673 > quality >= 0.0409208:
-        drop_amount_by_quality[func.add_drop_for_quality("purple")] += 1
+        drops_by_quality[func.stattrack_check("purple")] += 1
     elif 0.0409208 > quality >= 0.0089515:
-        drop_amount_by_quality[func.add_drop_for_quality("pink")] += 1
+        drops_by_quality[func.stattrack_check("pink")] += 1
     elif 0.0089515 > quality >= 0.0025576:
-        drop_amount_by_quality[func.add_drop_for_quality("red")] += 1
+        drops_by_quality[func.stattrack_check("red")] += 1
     else:
-        drop = func.add_drop_for_quality("yellow")
+        drop = func.stattrack_check("yellow")
         # gloves
         if is_glove_case and "stat_" in drop:
             drop = drop[5:]  # removes stat_
-        drop_amount_by_quality[drop] += 1
+        drops_by_quality[drop] += 1
     opened += 1
 
 
-# loops through the dict with drop amount for qualities and calculates wear.
-for quality, amount in drop_amount_by_quality.items():
+# loops through the dict with drop amount for qualities and drops random skin.
+for quality, amount in drops_by_quality.items():
     if amount != 0:
         skin_wear_dict = func.calculate_drops(case_name, quality, amount)
         with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['skin', 'amount']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            for skin_name, amount in skin_wear_dict.items():
-                writer.writerow({'skin': skin_name, 'amount': amount})
+            for skin, amount in skin_wear_dict.items():
+                writer.writerow({'skin': skin, 'amount': amount})
 
+# this part can be probably be removed, try checking vanilla skins in calculate_drops
 # add items into new list, for multiple drops
 # if skins is a vanilla skin, the wear is removed in vanilla_check()
 item_drop_dict = {}
@@ -137,7 +138,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
 request_count = len(item_drop_dict)
 request_time = func.calculate_avg_request_time()
 
-# calculates how often the program will timeout, when requesting
+# calculates how often the program will timeout, depending on total requests
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
     estimated_time = request_count * request_time
@@ -154,7 +155,8 @@ elif estimated_time == 60:
     print("Estimated time is 1 minute.")
 else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
-print()
+time.sleep(3)
+func.clear_terminal()
 
 timeout_count = 0
 total_case_amount = request_count

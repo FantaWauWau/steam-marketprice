@@ -4,8 +4,9 @@ import os
 import requests
 import locale
 import time
-from variables import http_status_codes, market_case_name
 from typing import Union
+
+from variables import http_status_codes, market_case_name
 
 
 def clear_terminal():
@@ -13,37 +14,18 @@ def clear_terminal():
     return os.system('cls' if os.name == 'nt' else 'clear')
 
 
-def is_stattrack() -> bool:
-    """Calculates random float from 0 - 1.
-
-    Args:
-        None
-
-    Returns:
-        True, if num <= 0.1, which results in a stat track skin.
-
-        False, if num > 0.1, regular skin.
-    """
-    stattrack_chance = 0.1
-    random_num = random.uniform(0, 1)
-    if random_num <= stattrack_chance:
-        return True
-    return False
-
-
-def add_drop_for_quality(color: str) -> str:
-    """Returns the color of skin depending on if is_stattrack().
+def stattrack_check(color: str) -> str:
+    """Modifies parameter 'color' based on if the drop is stattrack (10%).
 
     Args:
         color: The color of the skin e.g. 'blue'
 
     Returns:
-        If is_stattrack() it returns 'stat_' + arg(color).
+        If stattrack, returns "stat_" + 'color'.
 
-        If not is_stattrack() it returns the unmodified passed parameter.
+        If regular skin, it returns the unmodified passed parameter.
     """
-    # if random.uniform(0, 1) <= 0.1:
-    if is_stattrack():
+    if random.uniform(0, 1) <= 0.1:
         return "stat_" + color
     else:
         return color
