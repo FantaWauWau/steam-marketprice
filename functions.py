@@ -191,7 +191,8 @@ def calculate_avg_request_time() -> float:
     Returns:
         average: average of locally saved request times of user.
 
-        0.7: 0.7 is used as default average time of calculation fails.
+        0.7: 0.7s is used as default request time if calculation fails,
+        or has no values, because of first run.
     """
     try:
         total_values = -1  # -1 for header in csv
