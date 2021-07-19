@@ -37,6 +37,7 @@ def add_drop_for_quality(color: str) -> str:
 
         If not is_stattrack() it returns the unmodified passed parameter.
     """
+    # if random.uniform(0, 1) <= 0.1:
     if is_stattrack():
         return "stat_" + color
     else:

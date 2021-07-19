@@ -5,11 +5,11 @@ import math
 import requests
 import time
 import locale
-import functions
+import functions as func
 import variables
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-functions.file_check()
+func.file_check()
 
 drop_amount_by_quality = {
     "blue": 0,
@@ -91,15 +91,15 @@ opened = 0
 while opened < to_open:
     quality = random.uniform(0, 1)
     if 1 > quality >= 0.2007673:
-        drop_amount_by_quality[functions.add_drop_for_quality("blue")] += 1
+        drop_amount_by_quality[func.add_drop_for_quality("blue")] += 1
     elif 0.2007673 > quality >= 0.0409208:
-        drop_amount_by_quality[functions.add_drop_for_quality("purple")] += 1
+        drop_amount_by_quality[func.add_drop_for_quality("purple")] += 1
     elif 0.0409208 > quality >= 0.0089515:
-        drop_amount_by_quality[functions.add_drop_for_quality("pink")] += 1
+        drop_amount_by_quality[func.add_drop_for_quality("pink")] += 1
     elif 0.0089515 > quality >= 0.0025576:
-        drop_amount_by_quality[functions.add_drop_for_quality("red")] += 1
+        drop_amount_by_quality[func.add_drop_for_quality("red")] += 1
     else:
-        drop = functions.add_drop_for_quality("yellow")
+        drop = func.add_drop_for_quality("yellow")
         # gloves
         if is_glove_case and "stat_" in drop:
             drop = drop[5:]  # removes stat_
@@ -110,7 +110,7 @@ while opened < to_open:
 # loops through the dict with drop amount for qualities and calculates wear.
 for quality, amount in drop_amount_by_quality.items():
     if amount != 0:
-        skin_wear_dict = functions.calculate_wear(case_name, quality, amount)
+        skin_wear_dict = func.calculate_wear(case_name, quality, amount)
         with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
             fieldnames = ['skin_name', 'amount_of_drops']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -126,7 +126,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
     for row in reader:
         if int(row["amount_of_drops"]) >= 1:
             request_count += 1
-            is_vanilla, vanilla_name = functions.vanilla_check(row["skin_name"])
+            is_vanilla, vanilla_name = func.vanilla_check(row["skin_name"])
             if is_vanilla:
                 try:
                     item_drop_dict[vanilla_name] += int(row["amount_of_drops"])
@@ -135,7 +135,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin_name"]] = int(row["amount_of_drops"])
 
-avg_req_time = functions.calculate_avg_request_time()
+avg_req_time = func.calculate_avg_request_time()
 
 # calculates how often the program will timeout, when requesting
 amount_of_timeouts = math.floor(request_count / 20)
@@ -165,15 +165,15 @@ act_request_time = []
 # loops through the dict of {item: amount} of drops and sents price request
 for item_name, amount in item_drop_dict.items():
     if timeout_count == 20 and request_count != 0:
-        functions.timeout()
+        func.timeout()
         timeout_count = 0
 
     start_time = time.time()
-    request_success, response_value = functions.steam_request(item_name, amount)
+    request_success, response_value = func.steam_request(item_name, amount)
     if request_success:
         item_price_list.append(response_value)
     else:
-        functions.append_failed_items(item_name, response_value, request_count)
+        func.append_failed_items(item_name, response_value, request_count)
         fail_list.append((item_name, amount))
 
     request_count -= 1
@@ -190,21 +190,21 @@ if len(fail_list) > 0:
     print(f"Failed to get item prices for {request_count} items.")
     print("Starting second attempt...")
     time.sleep(3)
-    functions.timeout()
+    func.timeout()
     # loops through failed items and first request and reattempts to get price
     for item_name, amount in fail_list:
         if timeout_count == 20 and request_count != 0:
-            functions.timeout()
+            func.timeout()
             timeout_count = 0
 
         start_time = time.time()
-        request_success, response_value = functions.steam_request(item_name, amount)
+        request_success, response_value = func.steam_request(item_name, amount)
         if request_success:
             item_price_list.append(response_value)
             print(f"Got price for {item_name} on second attempt!")
             time.sleep(1)
         else:
-            functions.append_failed_items(item_name, response_value, request_count)
+            func.append_failed_items(item_name, response_value, request_count)
             failed_twice_list.append(item_name)
 
         request_count -= 1
