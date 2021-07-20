@@ -248,13 +248,13 @@ def file_check() -> None:
                          'http_status_code': 0})
 
 
-def append_failed_items(name: str, response: int, request_count: int) -> None:
+def append_failed_items(name: str, request_count: int, response: int) -> None:
     """Writes failed items with additional info into a file for debugging.
 
     Args:
         name: name of skin.
-        response: The http code returned by steam on failed request.
         request_count: Position in loop when it received an invalid response.
+        response: The http code returned by steam on failed request.
     """
     with open('failed_items.csv', 'r', encoding='utf-8') as file:
         reader = csv.DictReader(file)
@@ -285,7 +285,6 @@ def steam_request(name: str, amount: int) -> Union[bool, float]:
     """
     response = requests.get("https://steamcommunity.com/market/priceoverview/?"
                             "appid=730&currency=1&market_hash_name=" + name)
-
     try:
         formatted_response = response.json()
     except Exception:

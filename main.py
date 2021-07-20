@@ -114,8 +114,7 @@ for quality, amount in drops_by_quality.items():
             for skin, amount in skin_wear_dict.items():
                 writer.writerow({'skin': skin, 'amount': amount})
 
-# this part can be probably be removed, try checking vanilla skins in calculate_drops
-# add items into new list, for multiple drops
+# items in csv are checked for vanilla skins
 # if skins is a vanilla skin, the wear is removed in vanilla_check()
 item_drop_dict = {}
 with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
@@ -151,8 +150,6 @@ elif estimated_time == 60:
     print("Estimated time is 1 minute.")
 else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
-time.sleep(3)
-func.clear_terminal()
 
 timeout_count = 0
 total_case_amount = request_count
@@ -171,7 +168,7 @@ for item_name, amount in item_drop_dict.items():
     if request_success:
         item_price_list.append(response_value)
     else:
-        func.append_failed_items(item_name, response_value, request_count)
+        func.append_failed_items(item_name, request_count, response_value)
         fail_list.append((item_name, amount))
 
     request_count -= 1
@@ -201,7 +198,7 @@ if len(fail_list) > 0:
             print(f"Got price for {item_name} on second attempt!")
             time.sleep(1)
         else:
-            func.append_failed_items(item_name, response_value, request_count)
+            func.append_failed_items(item_name, request_count, response_value)
             failed_twice_list.append(item_name)
 
         request_count -= 1
@@ -227,7 +224,6 @@ print(f"You opened {to_open} cases for a total of {total_case_amount} skins.")
 print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
-print(f"Actual time: {round(sum(request_times), 2)}")
 
 current_results = []
 results = []
