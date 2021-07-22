@@ -6,7 +6,7 @@ import requests
 import time
 import locale
 
-import variables
+from variables import case_name_into_csv, market_case_name
 import functions as func
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -29,10 +29,11 @@ drops_by_quality = {
     }
 
 # case to open
+
 while True:
     case_name = input("Enter Case name to open: ").casefold()
-    if case_name in variables.case_name_into_csv:
-        case_name = variables.case_name_into_csv[case_name]
+    if case_name in case_name_into_csv:
+        case_name = case_name_into_csv[case_name]
         break
     if case_name[-4:] != ".csv":
         case_name = case_name + ".csv"
@@ -42,7 +43,7 @@ while True:
         print(f"File: {case_name} does not exist.")
 
 # get current case price
-formatted_case_name = variables.market_case_name[case_name]  # market name
+formatted_case_name = market_case_name[case_name]  # market name
 case_price = requests.get("https://steamcommunity.com/market/priceoverview/?"
                           "appid=730&currency=1&market_hash_name="
                           + formatted_case_name)
@@ -80,9 +81,8 @@ glove_case_list = ["Glove Case", "Operation Hydra Case", "Clutch Case",
                    "Operation Broken Fang Case", "Snakebite Case"]
 # checks if current case is a case with gloves
 is_glove_case = False
-for case in glove_case_list:
-    if case == case_name:
-        is_glove_case = True
+if case_name in glove_case_list:
+    is_glove_case = True
 
 # amount of drops by quality, including stattracks. For amount of cases to open
 opened = 0
@@ -249,8 +249,7 @@ with open('complete_results.csv', 'w') as csvfile:
     fieldnames = ["case", "total opened", "total spent", "return on invest"]
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
     writer.writeheader()
-    current_results.reverse()
-    for row in current_results:
+    for row in reversed(current_results):
         writer.writerow(row)
 
 # prints items which failed twice to get price

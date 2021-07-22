@@ -195,14 +195,17 @@ def calculate_avg_request_time() -> float:
         or has no values, because of first run.
     """
     try:
-        total_values = -1  # -1 for header in csv
-        sum_of_time = 0
+        total_values = 0
+        time_sum = 0
         with open('est_time.csv', 'r') as file:
             reader = csv.DictReader(file)
+            # time_sum = sum(float(row['request time']) for row in reader)
+            # total_values = len(list(reader))
             for row in reader:
                 total_values += 1
-                sum_of_time += float(row['request time'])
-        average = sum_of_time / total_values
+                time_sum += float(row['request time'])
+
+        average = time_sum / total_values
         return average
 
     except ZeroDivisionError:
