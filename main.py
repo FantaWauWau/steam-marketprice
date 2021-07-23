@@ -130,7 +130,7 @@ with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
             else:
                 item_drop_dict[row["skin"]] = int(row["amount"])
 
-request_count = len(item_drop_dict)
+request_count, total_case_amount = len(item_drop_dict), len(item_drop_dict)
 request_time = func.calculate_avg_request_time()
 
 # calculates how often the program will timeout, depending on total requests
@@ -152,10 +152,8 @@ else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
 
 timeout_count = 0
-total_case_amount = request_count
-fail_list = []
-item_price_list = []
-request_times = []
+
+fail_list, item_price_list, request_times = [], [], []
 
 # loops through the dict of {item: amount} of drops and sents price request
 for item_name, amount in item_drop_dict.items():
