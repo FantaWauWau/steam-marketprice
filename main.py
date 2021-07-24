@@ -6,8 +6,9 @@ import requests
 import time
 import locale
 
-from variables import case_name_into_csv, market_case_name
 import functions as func
+from variables import case_name_into_csv, market_case_name
+
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
@@ -29,7 +30,6 @@ drops_by_quality = {
     }
 
 # case to open
-
 while True:
     case_name = input("Enter Case name to open: ").casefold()
     if case_name in case_name_into_csv:
@@ -152,7 +152,6 @@ else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
 
 timeout_count = 0
-
 fail_list, item_price_list, request_times = [], [], []
 
 # loops through the dict of {item: amount} of drops and sents price request
@@ -175,7 +174,7 @@ for item_name, amount in item_drop_dict.items():
     time.sleep(0.3)
     request_times.append((time.time() - start_time))
 
-
+# second try to get item prices
 failed_twice_list = []
 request_count = len(fail_list)
 if len(fail_list) > 0:
@@ -223,8 +222,8 @@ print(f"Investment: ${rounded_cash}")
 print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
 
-current_results = []
-results = []
+current_results, results = [], []
+
 with open('complete_results.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:
