@@ -4,7 +4,7 @@ import os
 import requests
 import locale
 import time
-from typing import Union
+from typing import Tuple, Dict, Any
 
 from variables import http_status_codes, market_case_name
 
@@ -86,7 +86,7 @@ def drop_check(case_name: str, item: str) -> bool:
     return False
 
 
-def vanilla_check(skin_name: str) -> Union[bool, str]:
+def vanilla_check(skin_name: str) -> Tuple[bool, str]:
     """Checks if skins is a vanilla knife.
 
     Args:
@@ -105,7 +105,7 @@ def vanilla_check(skin_name: str) -> Union[bool, str]:
         return False, skin_name  # returns unformatted skin name
 
 
-def calculate_drops(case_name: str, quality: str, amount: int) -> dict:
+def calculate_drops(case_name: str, quality: str, amount: int) -> Dict:
     """Picks a random skin from items of 'quality' of 'case_name' and
     calculates a random wear for it.
 
@@ -275,7 +275,7 @@ def append_failed_items(name: str, request_count: int, response: int) -> None:
                          })
 
 
-def steam_request(name: str, amount: int) -> Union[bool, float]:
+def steam_request(name: str, amount: int) -> Tuple[bool, Any]:
     """Sends request to steam market to get price for an 'item_name'.
        If steam returns a price its multiplied by the dropped 'amount'.
 
