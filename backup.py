@@ -7,7 +7,7 @@ import time
 import locale
 
 import functions as func
-from variables import case_name_into_csv, market_case_name, vanilla_skins
+from variables import case_name_into_csv, market_case_name
 
 
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
@@ -79,10 +79,9 @@ while True:
 
 glove_case_list = ["Glove Case", "Operation Hydra Case", "Clutch Case",
                    "Operation Broken Fang Case", "Snakebite Case"]
-
 # checks if current case is a case with gloves
 is_glove_case = False
-if formatted_case_name in glove_case_list:
+if case_name in glove_case_list:
     is_glove_case = True
 
 # amount of drops by quality, including stattracks. For amount of cases to open
@@ -100,39 +99,38 @@ while opened < to_open:
     else:
         drop = func.stattrack_check("yellow")
         if is_glove_case and "stat_" in drop:
-            # stat_ needs to be removed, stattrack gloves do not exist
-            drop = drop[5:]
+            drop = drop[5:]  # removes stat_
         drops_by_quality[drop] += 1
     opened += 1
 
 
-skin_wear_dict = {}
+# loops through the dict with drop amount for qualities and drops random skin.
 for quality, amount in drops_by_quality.items():
     if amount != 0:
-        skin_wear_dict.update(func.calculate_drops(case_name, quality, amount))
+        skin_wear_dict = func.calculate_drops(case_name, quality, amount)
+        with open('cache.csv', 'a', newline='', encoding='utf-8') as csvfile:
+            fieldnames = ['skin', 'amount']
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            for skin, amount in skin_wear_dict.items():
+                writer.writerow({'skin': skin, 'amount': amount})
 
-to_add = []
-to_delete = []
-for key, value in skin_wear_dict.items():
-    for k, v in vanilla_skins.items():
-        if key == k:
-            to_add.append((k, v, value))
-            to_delete.append((key, value))
+# items in csv are checked for vanilla skins
+# if skins is a vanilla skin, the wear is removed in vanilla_check()
+item_drop_dict = {}
+with open('cache.csv', 'r', newline='', encoding='utf-8') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+        if int(row["amount"]) >= 1:
+            is_vanilla, vanilla_name = func.vanilla_check(row["skin"])
+            if is_vanilla:
+                try:
+                    item_drop_dict[vanilla_name] += int(row["amount"])
+                except Exception:
+                    item_drop_dict[vanilla_name] = int(row["amount"])
+            else:
+                item_drop_dict[row["skin"]] = int(row["amount"])
 
-# removes vanilla with wear
-for skin in to_delete:
-    del skin_wear_dict[skin[0]]
-
-# add vanilla without wear
-dict_val = {}
-for skin in to_add:
-    if skin[2] != 0:
-        dict_val[skin[1]] = skin[2]
-        skin_wear_dict.update(dict_val)
-
-skin_wear_dict = {k: v for k, v in skin_wear_dict.items() if v != 0}
-
-request_count, total_case_amount = len(skin_wear_dict), len(skin_wear_dict)
+request_count, total_case_amount = len(item_drop_dict), len(item_drop_dict)
 request_time = func.calculate_avg_request_time()
 
 # calculates how often the program will timeout, depending on total requests
@@ -157,7 +155,7 @@ timeout_count = 0
 fail_list, item_price_list, request_times = [], [], []
 
 # loops through the dict of {item: amount} of drops and sents price request
-for item_name, amount in skin_wear_dict.items():
+for item_name, amount in item_drop_dict.items():
     if timeout_count == 20 and request_count != 0:
         func.timeout()
         timeout_count = 0
