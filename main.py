@@ -134,7 +134,6 @@ skin_wear_dict = {k: v for k, v in skin_wear_dict.items() if v != 0}
 
 request_count, total_case_amount = len(skin_wear_dict), len(skin_wear_dict)
 request_time = func.calculate_avg_request_time()
-
 # calculates how often the program will timeout, depending on total requests
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
@@ -153,9 +152,9 @@ elif estimated_time == 60:
 else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
 
-timeout_count = 0
-fail_list, item_price_list, request_times = [], [], []
 
+fail_list, item_price_list, request_times = [], [], []
+timeout_count = 0
 # loops through the dict of {item: amount} of drops and sents price request
 for item_name, amount in skin_wear_dict.items():
     if timeout_count == 20 and request_count != 0:
@@ -225,7 +224,6 @@ print(f"Return: ${rounded_sum}")
 print(f"Return on invest: ${rounded_result}")
 
 current_results, results = [], []
-
 with open('complete_results.csv', 'r') as csvfile:
     reader = csv.DictReader(csvfile)
     for row in reader:

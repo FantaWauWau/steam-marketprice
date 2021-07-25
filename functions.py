@@ -238,11 +238,13 @@ def file_check() -> None:
                                  'total spent': 0, 'return on invest': 0})
 
     # cache.csv & failed_items.csv are always created new on start.
+    # cache.csv currently not in use, only enable for debugging
+    """
     with open('cache.csv', 'w', newline='', encoding='utf-8') as csvfile:
         fieldnames = ["skin", "amount"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-
+    """
     with open('failed_items.csv', 'w', newline='') as file:
         fieldnames = ['skin', 'request_count', 'response', 'http_status_code']
         writer = csv.DictWriter(file, fieldnames=fieldnames)
