@@ -111,8 +111,8 @@ for quality, amount in drops_by_quality.items():
     if amount != 0:
         skin_wear_dict.update(func.calculate_drops(case_name, quality, amount))
 
-to_add = []
-to_delete = []
+to_add, to_delete = [], []
+
 for key, value in skin_wear_dict.items():
     for k, v in vanilla_skins.items():
         if key == k:
