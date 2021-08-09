@@ -9,7 +9,7 @@ import locale
 import functions as func
 from variables import case_name_into_csv, market_case_name, vanilla_skins
 
-
+# . and , in prices :)
 locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 func.clear_terminal()
@@ -55,7 +55,6 @@ except TypeError:
     print(f"Failed to get price for {formatted_case_name}! \n"
           "Please wait 1-2 minutes or choose a different case.")
     quit()
-
 
 while True:
     cases_to_open = input("Enter amount of cases or $: ")
@@ -111,8 +110,8 @@ for quality, amount in drops_by_quality.items():
     if amount != 0:
         skin_wear_dict.update(func.calculate_drops(case_name, quality, amount))
 
-to_add, to_delete = [], []
-
+to_add = []
+to_delete = []
 for key, value in skin_wear_dict.items():
     for k, v in vanilla_skins.items():
         if key == k:
@@ -134,7 +133,7 @@ skin_wear_dict = {k: v for k, v in skin_wear_dict.items() if v != 0}
 
 request_count, total_case_amount = len(skin_wear_dict), len(skin_wear_dict)
 request_time = func.calculate_avg_request_time()
-# calculates how often the program will timeout, depending on total requests
+
 amount_of_timeouts = math.floor(request_count / 20)
 if amount_of_timeouts < 1:
     estimated_time = request_count * request_time
@@ -142,7 +141,6 @@ else:
     estimated_time = (amount_of_timeouts * 60) + (request_count * request_time)
 
 print(f"Requesting prices for {request_count} unique skins.")
-# calculates estimated time to sent all requests and process them
 if estimated_time > 60:
     minutes = estimated_time // 60
     seconds = round(estimated_time - minutes * 60, 2)
@@ -153,9 +151,12 @@ else:
     print(f"Estimated time is {math.ceil(estimated_time)} seconds.")
 
 
-fail_list, item_price_list, request_times = [], [], []
+fail_list = []
+item_price_list = []
+request_times = []
+
 timeout_count = 0
-# loops through the dict of {item: amount} of drops and sents price request
+# loops through the dict of {item: amount} of drops and sends price request
 for item_name, amount in skin_wear_dict.items():
     if timeout_count == 20 and request_count != 0:
         func.timeout()
@@ -178,12 +179,13 @@ for item_name, amount in skin_wear_dict.items():
 # second try to get item prices
 failed_twice_list = []
 request_count = len(fail_list)
+
 if len(fail_list) > 0:
     print(f"Failed to get item prices for {request_count} items.")
     print("Starting second attempt...")
     time.sleep(3)
     func.timeout()
-    # loops through failed items and first request and reattempts to get price
+
     for item_name, amount in fail_list:
         if timeout_count == 20 and request_count != 0:
             func.timeout()
@@ -249,7 +251,7 @@ with open('complete_results.csv', 'w') as csvfile:
     for row in reversed(current_results):
         writer.writerow(row)
 
-# prints items which failed twice to get price
+# prints items which failed twice to get price for
 if len(failed_twice_list) > 0:
     print("Failed twice to get price for: ")
     for item in failed_twice_list:
